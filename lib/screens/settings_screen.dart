@@ -15,6 +15,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _notificationsEnabled = true;
   bool _emailNotifications = true;
   bool _darkMode = false;
+  bool _aiEnabled = true;
+  bool _moodTracking = true;
+  String _language = 'English';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    // Load settings from SharedPreferences
+    // For now, using default values
+  }
+
+  Future<void> _saveSettings() async {
+    // Save settings to SharedPreferences
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,6 +124,116 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Dark mode coming soon!'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            },
+          ),
+          
+          const SizedBox(height: 16),
+          
+          // AI Assistant Section
+          _buildSectionHeader('AI Assistant'),
+          
+          _buildGlassSwitchTile(
+            title: 'Enable AI Features',
+            subtitle: 'AI-powered pantry assistant',
+            value: _aiEnabled,
+            icon: Icons.smart_toy,
+            onChanged: (value) {
+              setState(() {
+                _aiEnabled = value;
+              });
+              _saveSettings();
+            },
+          ),
+          
+          _buildGlassSwitchTile(
+            title: 'Mood Tracking',
+            subtitle: 'Track mood for personalized suggestions',
+            value: _moodTracking,
+            icon: Icons.mood,
+            onChanged: (value) {
+              setState(() {
+                _moodTracking = value;
+              });
+              _saveSettings();
+            },
+          ),
+          
+          _buildGlassTile(
+            icon: Icons.chat,
+            title: 'Open AI Assistant',
+            subtitle: 'Chat with your AI friend',
+            onTap: () {
+              Navigator.pushNamed(context, '/ai-assistant');
+            },
+          ),
+          
+          const SizedBox(height: 16),
+          
+          // Personalization Section
+          _buildSectionHeader('Personalization'),
+          
+          _buildGlassTile(
+            icon: Icons.restaurant_menu,
+            title: 'Food Preferences',
+            subtitle: 'Dietary restrictions, allergies, dislikes',
+            onTap: () {
+              Navigator.pushNamed(context, '/user-preferences');
+            },
+          ),
+          
+          _buildGlassTile(
+            icon: Icons.language,
+            title: 'Language',
+            subtitle: _language,
+            onTap: () {
+              _showLanguageSelector(context);
+            },
+          ),
+          
+          _buildGlassTile(
+            icon: Icons.color_lens,
+            title: 'Theme Color',
+            subtitle: 'Customize app appearance',
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Theme customization coming soon!'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            },
+          ),
+          
+          const SizedBox(height: 16),
+          
+          // Data Management Section
+          _buildSectionHeader('Data Management'),
+          
+          _buildGlassTile(
+            icon: Icons.download,
+            title: 'Export Data',
+            subtitle: 'Download your pantry data',
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Data export coming soon!'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            },
+          ),
+          
+          _buildGlassTile(
+            icon: Icons.upload,
+            title: 'Import Data',
+            subtitle: 'Restore from backup',
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Data import coming soon!'),
                   duration: Duration(seconds: 2),
                 ),
               );
@@ -551,5 +679,68 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
       }
     }
+  }
+
+  void _showLanguageSelector(BuildContext context) {
+    final languages = ['English', 'Spanish', 'French', 'German', 'Hindi', 'Chinese', 'Japanese'];
+    
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => GlassContainer(
+        blur: 20,
+        opacity: 0.3,
+        borderRadius: 24,
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Select Language',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ...languages.map((lang) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: ListTile(
+                  onTap: () {
+                    setState(() {
+                      _language = lang;
+                    });
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Language set to $lang'),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                  title: Text(
+                    lang,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                  ),
+                  trailing: _language == lang
+                      ? const Icon(Icons.check, color: Colors.white)
+                      : null,
+                  tileColor: Colors.white.withOpacity(0.1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              )).toList(),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

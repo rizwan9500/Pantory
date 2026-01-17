@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../services/ai_service.dart';
 import '../services/pantry_service.dart';
+import '../models/user_preferences.dart';
 import '../widgets/animated_gradient_background.dart';
 import '../widgets/glass_container.dart';
 
@@ -20,11 +23,16 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
   final ScrollController _scrollController = ScrollController();
   final List<ChatMessage> _messages = [];
   bool _isLoading = false;
+  String? _currentMood;
+  String? _currentFoodPreference;
+  bool _inMoodConversation = false;
+  UserPreferences? _userPreferences;
 
   @override
   void initState() {
     super.initState();
     _initializeAI();
+    _loadUserPreferences();
     _addWelcomeMessage();
   }
 
@@ -32,17 +40,37 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
     await _aiService.initialize();
   }
 
+  Future<void> _loadUserPreferences() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final prefsJson = prefs.getString('user_preferences');
+      if (prefsJson != null) {
+        setState(() {
+          _userPreferences = UserPreferences.fromJson(jsonDecode(prefsJson));
+        });
+      }
+    } catch (e) {
+      // Preferences not set yet, that's okay
+    }
+  }
+
   void _addWelcomeMessage() {
+    String welcomeText = '👋 Hi! I\'m your AI pantry assistant and friend. I can help with recipes, pantry management, or just chat about how you\'re feeling today! How can I help?';
+    
+    if (_userPreferences != null && _userPreferences!.hasRestrictions()) {
+      welcomeText += '\n\n✨ I see you have dietary preferences set. I\'ll make sure all recipe suggestions respect your needs!';
+    }
+
     setState(() {
       _messages.add(ChatMessage(
-        text: '👋 Hi! I\'m your AI pantry assistant. How can I help you today?',
+        text: welcomeText,
         isUser: false,
         timestamp: DateTime.now(),
         suggestions: [
-          'Show recipes',
-          'Check expiring items',
-          'Storage tips',
-          'Shopping list',
+          '😊 Let\'s talk about my mood',
+          '🍳 Show recipes',
+          '📦 Check expiring items',
+          '💡 Storage tips',
         ],
       ));
     });
@@ -69,6 +97,109 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
       final pantryService = Provider.of<PantryService>(context, listen: false);
       final items = pantryService.items;
 
+      // Check if user wants to start mood conversation
+      if (text.toLowerCase().contains('mood') || 
+          text.toLowerCase().contains('feeling') ||
+          text.toLowerCase().contains('how am i') ||
+          text.toLowerCase().contains('talk about')) {
+        final response = await _aiService.startMoodConversation();
+        setState(() {
+          _inMoodConversation = true;
+          _messages.add(ChatMessage(
+            text: response.message,
+            isUser: false,
+            timestamp: DateTime.now(),
+            suggestions: response.suggestions,
+            action: response.action,
+          ));
+          _isLoading = false;
+        });
+        _scrollToBottom();
+        return;
+      }
+
+      // Handle mood response
+      if (_inMoodConversation && _currentMood == null) {
+        final response = await _aiService.respondToMood(text, items);
+        setState(() {
+          _currentMood = text;
+          _messages.add(ChatMessage(
+            text: response.message,
+            isUser: false,
+            timestamp: DateTime.now(),
+            suggestions: response.suggestions,
+            action: response.action,
+          ));
+          _isLoading = false;
+        });
+        _scrollToBottom();
+        return;
+      }
+
+      // Handle food preference and show recipes
+      if (_inMoodConversation && _currentMood != null && _currentFoodPreference == null) {
+        setState(() {
+          _currentFoodPreference = text;
+          _isLoading = true;
+        });
+
+        final recipeResponse = await _aiService.getMoodBasedRecipes(
+          _currentMood!,
+          text,
+          items,
+          userPreferences: _userPreferences,
+        );
+
+        setState(() {
+          // Add the message
+          _messages.add(ChatMessage(
+            text: '${recipeResponse.message}\n\n${recipeResponse.moodMessage}',
+            isUser: false,
+            timestamp: DateTime.now(),
+            suggestions: [],
+          ));
+
+          // Add each recipe as a separate message
+          for (final recipe in recipeResponse.recipes) {
+            _messages.add(ChatMessage(
+              text: '${recipe.emoji} **${recipe.name}**\n\n'
+                  '${recipe.description}\n\n'
+                  '💡 *${recipe.moodBoost}*\n\n'
+                  '⏱️ Prep time: ${recipe.prepTime} mins | Difficulty: ${recipe.difficulty}\n\n'
+                  '**Ingredients:**\n${recipe.ingredients.map((i) => '• $i').join('\n')}\n\n'
+                  '**Instructions:**\n${recipe.instructions}',
+              isUser: false,
+              timestamp: DateTime.now(),
+              suggestions: [],
+            ));
+          }
+
+          // Add continuation message
+          if (recipeResponse.conversationContinuation != null) {
+            _messages.add(ChatMessage(
+              text: recipeResponse.conversationContinuation!,
+              isUser: false,
+              timestamp: DateTime.now(),
+              suggestions: [
+                'Tell me more about one',
+                'Start over with new mood',
+                'Thanks, that helps!',
+                'Just keep chatting'
+              ],
+            ));
+          }
+
+          // Reset conversation state
+          _inMoodConversation = false;
+          _currentMood = null;
+          _currentFoodPreference = null;
+          _isLoading = false;
+        });
+        _scrollToBottom();
+        return;
+      }
+
+      // Regular chat
       final response = await _aiService.chat(text, items);
 
       setState(() {

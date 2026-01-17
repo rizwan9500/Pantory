@@ -1,6 +1,6 @@
 # Pantory - Smart Pantry Management App
 
-A freemium subscription-based mobile application for managing your pantry efficiently with a 7-day free trial and Razorpay payment integration.
+A freemium subscription-based mobile application for managing your pantry efficiently with a 7-day free trial, Razorpay payment integration, AI-powered mood-based recipe suggestions, and comprehensive ingredient search with Supabase integration.
 
 ![Pantory Logo](Pantory.png)
 
@@ -23,11 +23,20 @@ A freemium subscription-based mobile application for managing your pantry effici
 - ✅ Help & FAQ
 - ✅ Terms of Service
 - ✅ Privacy Policy
+- ✅ **AI-Powered Mood-Based Recipe Assistant** 🆕
+- ✅ **Enhanced Profile with Mood Tracking** 🆕
+- ✅ **Advanced Settings & Personalization** 🆕
+- ✅ **Supabase Ingredient Database Integration** 🆕
+- ✅ **Advanced 20x Ingredient Search** 🆕
+- ✅ **Image Recognition & Barcode Scanning** 🆕
 
 ### Free Features
 - ✅ Basic Pantry Management
 - ✅ Expiry Reminders
 - ✅ Basic Sync Across Devices
+- ✅ AI Assistant (Basic conversational features)
+- ✅ Mood Tracking
+- ✅ Ingredient Search (Supabase database)
 - ⚠️ Ad-supported experience
 
 ### Pro Features (Available with Subscription)
@@ -38,6 +47,132 @@ A freemium subscription-based mobile application for managing your pantry effici
 - ⭐ Priority Support
 - ⭐ Exclusive Content
 - ⭐ Unlimited Sync
+- ⭐ Advanced AI Features (Full mood-based recipe suggestions)
+- ⭐ Advanced Ingredient Search (External APIs + Image Recognition)
+
+## 🔍 Advanced Ingredient Search - 20x Better
+
+Pantory features a world-class ingredient search system with multiple data sources and input methods:
+
+### Supabase Integration (Your Own Database)
+- **Full Control**: Store all ingredients in your own Supabase instance
+- **No API Costs**: No external API dependencies or rate limits
+- **Unlimited Scalability**: Add millions of ingredients
+- **Community-Driven**: Users can contribute to the ingredient database
+- **Privacy-First**: All data stored securely in your Supabase project
+- **Instant Setup**: Run the provided SQL migration and start immediately
+
+### Search Capabilities
+- **Variety Recognition**: Search for specific types (Fuji apple, King salmon, Baby spinach)
+- **Scientific Names**: Precise ingredient identification
+- **Category Filtering**: Filter by fruits, vegetables, meats, etc.
+- **Dietary Tags**: Filter by vegan, gluten-free, keto, etc.
+- **Allergen Exclusion**: Automatically exclude allergens based on user preferences
+- **Popular Ingredients**: Quick access to commonly used ingredients
+
+### Multiple Input Methods
+1. **Text Search**: Type any ingredient name or variety
+2. **Barcode Scanning**: Scan product barcodes for instant lookup
+3. **Image Recognition**: Take a photo and AI identifies the ingredients
+
+### Data Sources
+- **Primary**: Supabase database (your own, unlimited)
+- **Fallback**: USDA FoodData Central (600K+ foods)
+- **Fallback**: Open Food Facts (2.8M+ products)
+- **Optional**: Nutritionix, Edamam (800K+ additional items)
+
+### Setup Guide
+See `SUPABASE_SETUP.md` for complete setup instructions including:
+- Database schema and migration SQL
+- Sample ingredient data
+- Configuration steps
+- Bulk import options
+- API integration guide
+
+## 🤖 AI Assistant - Your Personal Food Friend
+
+Our AI Assistant is like having a caring friend, sibling, or partner who understands your mood and helps you feel better through food! 
+
+### Natural Language Mood Detection
+- **No Manual Selection**: Just type how you're feeling naturally
+- **Smart Analysis**: AI detects mood from your words, sentiment, and context
+- **Examples**: 
+  - "Having a rough day" → Detects bad mood
+  - "Feeling absolutely amazing!" → Detects excellent mood
+  - "Just okay, nothing special" → Detects okay mood
+
+### Mood-Based Recipe Suggestions
+The AI Assistant talks with you about your mood and suggests recipes to help elevate your feelings:
+
+- **Feeling Bad/Not Great?** 😔 → The AI suggests comfort foods and uplifting recipes to help you feel better
+- **Feeling Okay?** 😐 → Get recipes that can turn your day around and boost your mood
+- **Feeling Good?** 🙂 → Discover recipes to take you from good to great!
+- **Feeling Great?** 😊 → Maintain those good vibes with energizing meals
+- **Feeling Excellent?** 😄 → Keep the momentum with amazing food experiences
+
+### Personalized Recipe Filtering
+All recipes are automatically filtered based on your preferences:
+- **Country/Cuisine**: Regional comfort foods from your home country
+- **Dietary Restrictions**: 33 types including vegetarian, vegan, gluten-free, halal, kosher
+- **Allergies**: Automatically excludes your allergens (60+ allergens tracked)
+- **Disliked Foods**: Respects your food preferences (150+ common dislikes)
+
+### Conversational & Friendly
+The AI Assistant:
+- Talks like a real friend or caring sibling
+- Understands your emotions and responds with empathy
+- Provides mood-boosting explanations with each recipe
+- Remembers context within conversations
+- Offers personalized suggestions based on your pantry items
+
+### How It Works
+1. Open the AI Assistant from the home screen or settings
+2. Start a conversation by typing how you're feeling naturally
+3. The AI detects your mood and responds with empathy
+4. Get personalized recipe suggestions designed to elevate your mood
+5. Each recipe includes:
+   - Mood-boosting benefits explanation
+   - Preparation time and difficulty
+   - Step-by-step instructions
+   - Friendly encouragement
+   - Filtered for your dietary needs
+
+## 📊 Enhanced Profile Features
+
+### Mood Tracking
+- Track your daily mood with 5 levels: Excellent, Great, Good, Okay, Bad
+- View mood history over time
+- Get insights into your emotional patterns
+- Connect mood data with AI recipe suggestions
+
+### Activity Statistics
+- **Total Items**: Track items in your pantry
+- **Categories**: See how many food categories you manage
+- **Favorites**: Count of your favorite items
+- **Mood Check-ins**: Track your mood tracking consistency
+
+### Personalization
+- Customizable profile with avatar
+- Activity history and achievements
+- Subscription status overview
+- Quick access to all settings
+
+## ⚙️ Advanced Settings
+
+### AI Assistant Settings
+- **Enable/Disable AI Features**: Control AI functionality
+- **Mood Tracking**: Toggle mood-based features
+- **Quick AI Access**: Direct link to AI Assistant chat
+
+### Personalization Options
+- **Language Selection**: Choose from 7+ languages (English, Spanish, French, German, Hindi, Chinese, Japanese)
+- **Theme Customization**: Personalize app appearance (coming soon)
+- **Notification Preferences**: Fine-tune how you receive alerts
+
+### Data Management
+- **Export Data**: Download your pantry data for backup
+- **Import Data**: Restore from previous backups
+- **Privacy Controls**: Manage your data and privacy settings
 
 ## Subscription Plans
 
@@ -120,7 +255,8 @@ lib/
 │   ├── user_model.dart            # User data model
 │   ├── subscription_plan.dart     # Subscription plans
 │   ├── pantry_item.dart           # Pantry item model
-│   └── shopping_list_item.dart    # Shopping list item model
+│   ├── shopping_list_item.dart    # Shopping list item model
+│   └── mood_model.dart            # Mood tracking model 🆕
 ├── screens/                       # UI screens
 │   ├── welcome_screen.dart
 │   ├── login_screen.dart
@@ -129,17 +265,19 @@ lib/
 │   ├── trial_info_screen.dart
 │   ├── home_screen.dart
 │   ├── subscription_screen.dart
-│   ├── profile_screen.dart
-│   ├── settings_screen.dart
+│   ├── profile_screen.dart        # Enhanced with mood tracking 🆕
+│   ├── settings_screen.dart       # Enhanced with AI & personalization 🆕
 │   ├── shopping_list_screen.dart  # Shopping list management
 │   ├── analytics_screen.dart      # Analytics dashboard
+│   ├── ai_assistant_screen.dart   # AI mood-based chat 🆕
 │   ├── help_screen.dart           # Help & FAQ
 │   ├── terms_screen.dart          # Terms of Service
 │   └── privacy_screen.dart        # Privacy Policy
 ├── services/                      # Business logic
 │   ├── auth_service.dart          # Authentication
 │   ├── subscription_service.dart  # Payment & subscription
-│   └── pantry_service.dart        # Pantry management
+│   ├── pantry_service.dart        # Pantry management
+│   └── ai_service.dart            # AI & mood-based features 🆕
 └── widgets/                       # Reusable widgets (if needed)
 ```
 
@@ -150,6 +288,18 @@ lib/
 2. Create Account (Email/Password or Google)
 3. Trial Info Screen (7-day free trial)
 4. Home Screen (with trial active)
+
+### AI Mood-Based Recipe Flow 🆕
+1. User opens AI Assistant (from home or settings)
+2. AI greets and asks about mood
+3. User selects or describes their mood
+4. AI responds with empathy and asks about food preferences
+5. User selects food preference (comfort food, healthy, sweet, etc.)
+6. AI suggests 2-4 mood-appropriate recipes with:
+   - Mood-boosting explanation
+   - Preparation details
+   - Step-by-step instructions
+7. User can continue chatting or start over with new mood
 
 ### Subscription Flow
 1. User taps "Upgrade" or trial expires
@@ -198,7 +348,11 @@ Uses Supabase Authentication for secure user management.
 |---------|------|-------|-----|
 | Basic Pantry Management | ✅ | ✅ | ✅ |
 | Expiry Reminders | ✅ | ✅ | ✅ |
+| AI Assistant (Basic) | ✅ | ✅ | ✅ |
+| Mood Tracking | ✅ | ✅ | ✅ |
+| Profile Statistics | ✅ | ✅ | ✅ |
 | Ads | ❌ (Has ads) | ✅ | ✅ |
+| AI Mood-Based Recipes | Limited | ✅ | ✅ |
 | Offline Mode | ❌ | ✅ | ✅ |
 | Advanced Analytics | ❌ | ✅ | ✅ |
 | Smart Shopping Lists | ❌ | ✅ | ✅ |
@@ -227,12 +381,21 @@ Uses Supabase Authentication for secure user management.
   - [x] Privacy Policy
   - [x] Settings page completion
   - [x] Profile page enhancements
+- [x] Day 4: AI & Mood Features 🆕
+  - [x] Mood-based AI conversation system
+  - [x] Recipe suggestions based on mood
+  - [x] Enhanced profile with mood tracking
+  - [x] Advanced settings with personalization
+  - [x] Mood history and statistics
+  - [x] AI friend/sibling-like personality
+  - [x] Mood elevation system (bad → okay → good → great → excellent)
 - [ ] Future: Testing & Backend Integration
   - [ ] End-to-end testing
   - [ ] Payment flow testing
   - [ ] Supabase authentication integration (completed)
   - [ ] Cross-device sync backend
   - [ ] Performance optimization
+  - [ ] AI model integration with Gemini API
 
 ## Testing
 
@@ -275,7 +438,31 @@ RAZORPAY_KEY_ID=your_key_here
 RAZORPAY_KEY_SECRET=your_secret_here
 SUPABASE_URL=your_supabase_url
 SUPABASE_ANON_KEY=your_supabase_anon_key
+GEMINI_API_KEY=your_gemini_api_key  # Optional: For advanced AI features
 ```
+
+## 🎯 Key Highlights
+
+### What Makes Pantory Special
+
+1. **Empathetic AI Assistant**: Unlike typical chatbots, our AI talks to you like a caring friend or sibling, understanding your emotions and responding with genuine care.
+
+2. **Mood-Based Food Science**: Recipes are selected not just based on ingredients, but on their proven mood-boosting properties. Each suggestion explains *why* it will help you feel better.
+
+3. **Holistic Wellness**: We believe food is more than fuel - it's medicine for the mind and soul. Our app helps you use your pantry to maintain and improve your emotional well-being.
+
+4. **Personalized Journey**: Track your mood over time, see patterns, and get increasingly personalized recommendations as the AI learns what works for you.
+
+5. **Beautiful, Intuitive UI**: Glass-morphism design with smooth animations creates a premium, calming user experience.
+
+### Technical Innovation
+
+- **State Management**: Provider pattern for efficient state handling
+- **Authentication**: Secure Supabase integration
+- **Payment Processing**: Seamless Razorpay integration
+- **AI Conversation**: Context-aware chat with mood detection
+- **Local Storage**: SharedPreferences for offline mood tracking
+- **Responsive Design**: Works beautifully on all screen sizes
 
 ## Contributing
 
@@ -298,7 +485,11 @@ For support, email support@pantory.com or open an issue in the repository.
 - Flutter team for the amazing framework
 - Razorpay for seamless payment integration
 - Supabase for authentication and backend services
+- Google Gemini AI for advanced AI capabilities (planned)
+- The open-source community for inspiration and support
 
 ---
 
-**Made with ❤️ for efficient pantry management**
+**Made with ❤️ for efficient pantry management and emotional well-being**
+
+*"Because good food isn't just about nutrition - it's about nourishing your soul."* 🌟

@@ -7,6 +7,13 @@ class UserModel {
   final DateTime? trialEndDate;
   final SubscriptionStatus subscriptionStatus;
   final String? currentPlan;
+  
+  // User preferences for personalized AI suggestions
+  final String? country;
+  final String? preferredCuisine;
+  final List<String>? dietaryRestrictions; // e.g., ['vegetarian', 'vegan', 'halal', 'kosher']
+  final List<String>? allergies; // e.g., ['peanuts', 'dairy', 'gluten', 'shellfish']
+  final List<String>? dislikedFoods; // Foods user doesn't like
 
   UserModel({
     required this.id,
@@ -17,6 +24,11 @@ class UserModel {
     this.trialEndDate,
     this.subscriptionStatus = SubscriptionStatus.free,
     this.currentPlan,
+    this.country,
+    this.preferredCuisine,
+    this.dietaryRestrictions,
+    this.allergies,
+    this.dislikedFoods,
   });
 
   bool get hasActiveSubscription =>
@@ -41,6 +53,11 @@ class UserModel {
       'trialEndDate': trialEndDate?.toIso8601String(),
       'subscriptionStatus': subscriptionStatus.toString(),
       'currentPlan': currentPlan,
+      'country': country,
+      'preferredCuisine': preferredCuisine,
+      'dietaryRestrictions': dietaryRestrictions,
+      'allergies': allergies,
+      'dislikedFoods': dislikedFoods,
     };
   }
 
@@ -59,6 +76,17 @@ class UserModel {
         orElse: () => SubscriptionStatus.free,
       ),
       currentPlan: json['currentPlan'],
+      country: json['country'],
+      preferredCuisine: json['preferredCuisine'],
+      dietaryRestrictions: json['dietaryRestrictions'] != null 
+          ? List<String>.from(json['dietaryRestrictions']) 
+          : null,
+      allergies: json['allergies'] != null 
+          ? List<String>.from(json['allergies']) 
+          : null,
+      dislikedFoods: json['dislikedFoods'] != null 
+          ? List<String>.from(json['dislikedFoods']) 
+          : null,
     );
   }
 
@@ -71,6 +99,11 @@ class UserModel {
     DateTime? trialEndDate,
     SubscriptionStatus? subscriptionStatus,
     String? currentPlan,
+    String? country,
+    String? preferredCuisine,
+    List<String>? dietaryRestrictions,
+    List<String>? allergies,
+    List<String>? dislikedFoods,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -81,6 +114,11 @@ class UserModel {
       trialEndDate: trialEndDate ?? this.trialEndDate,
       subscriptionStatus: subscriptionStatus ?? this.subscriptionStatus,
       currentPlan: currentPlan ?? this.currentPlan,
+      country: country ?? this.country,
+      preferredCuisine: preferredCuisine ?? this.preferredCuisine,
+      dietaryRestrictions: dietaryRestrictions ?? this.dietaryRestrictions,
+      allergies: allergies ?? this.allergies,
+      dislikedFoods: dislikedFoods ?? this.dislikedFoods,
     );
   }
 }
