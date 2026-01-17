@@ -4,8 +4,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../services/auth_service.dart';
 import '../models/user_preferences.dart';
+import '../data/preference_data.dart';
 import '../widgets/animated_gradient_background.dart';
 import '../widgets/glass_container.dart';
+import '../widgets/searchable_dropdown.dart';
+import '../widgets/multi_select_dropdown.dart';
 
 /// User Preferences Screen for collecting dietary restrictions, allergies, and food preferences
 class UserPreferencesScreen extends StatefulWidget {
@@ -16,15 +19,11 @@ class UserPreferencesScreen extends StatefulWidget {
 }
 
 class _UserPreferencesScreenState extends State<UserPreferencesScreen> {
-  final TextEditingController _countryController = TextEditingController();
-  final TextEditingController _cuisineController = TextEditingController();
-  final TextEditingController _customAllergyController = TextEditingController();
-  final TextEditingController _customDislikeController = TextEditingController();
-
+  String? _selectedCountry;
+  String? _selectedCuisine;
   List<String> _selectedRestrictions = [];
   List<String> _selectedAllergies = [];
-  List<String> _customAllergies = [];
-  List<String> _dislikedFoods = [];
+  List<String> _selectedDislikes = [];
 
   bool _isLoading = true;
 
@@ -42,19 +41,11 @@ class _UserPreferencesScreenState extends State<UserPreferencesScreen> {
       if (prefsJson != null) {
         final userPrefs = UserPreferences.fromJson(jsonDecode(prefsJson));
         setState(() {
-          _countryController.text = userPrefs.country ?? '';
-          _cuisineController.text = userPrefs.preferredCuisine ?? '';
+          _selectedCountry = userPrefs.country;
+          _selectedCuisine = userPrefs.preferredCuisine;
           _selectedRestrictions = List.from(userPrefs.dietaryRestrictions);
-          
-          // Separate standard allergies from custom ones
-          _selectedAllergies = userPrefs.allergies
-              .where((a) => CommonAllergens.all.contains(a))
-              .toList();
-          _customAllergies = userPrefs.allergies
-              .where((a) => !CommonAllergens.all.contains(a))
-              .toList();
-          
-          _dislikedFoods = List.from(userPrefs.dislikedFoods);
+          _selectedAllergies = List.from(userPrefs.allergies);
+          _selectedDislikes = List.from(userPrefs.dislikedFoods);
           _isLoading = false;
         });
       } else {
@@ -67,14 +58,12 @@ class _UserPreferencesScreenState extends State<UserPreferencesScreen> {
 
   Future<void> _savePreferences() async {
     try {
-      final allAllergies = [..._selectedAllergies, ..._customAllergies];
-      
       final userPrefs = UserPreferences(
-        country: _countryController.text.trim().isEmpty ? null : _countryController.text.trim(),
-        preferredCuisine: _cuisineController.text.trim().isEmpty ? null : _cuisineController.text.trim(),
+        country: _selectedCountry,
+        preferredCuisine: _selectedCuisine,
         dietaryRestrictions: _selectedRestrictions,
-        allergies: allAllergies,
-        dislikedFoods: _dislikedFoods,
+        allergies: _selectedAllergies,
+        dislikedFoods: _selectedDislikes,
       );
 
       final prefs = await SharedPreferences.getInstance();
@@ -104,10 +93,6 @@ class _UserPreferencesScreenState extends State<UserPreferencesScreen> {
 
   @override
   void dispose() {
-    _countryController.dispose();
-    _cuisineController.dispose();
-    _customAllergyController.dispose();
-    _customDislikeController.dispose();
     super.dispose();
   }
 
@@ -250,6 +235,14 @@ class _UserPreferencesScreenState extends State<UserPreferencesScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionTitle('🌍 Regional Preferences'),
+        const SizedBox(height: 8),
+        Text(
+          'Select from ${PreferenceData.countries.length}+ countries and ${PreferenceData.cuisines.length}+ cuisines',
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.7),
+            fontSize: 13,
+          ),
+        ),
         const SizedBox(height: 12),
         GlassContainer(
           padding: const EdgeInsets.all(16),
@@ -258,52 +251,28 @@ class _UserPreferencesScreenState extends State<UserPreferencesScreen> {
           opacity: 0.2,
           child: Column(
             children: [
-              TextField(
-                controller: _countryController,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: 'Country',
-                  labelStyle: const TextStyle(color: Colors.white70),
-                  hintText: 'e.g., India, USA, Italy',
-                  hintStyle: const TextStyle(color: Colors.white38),
-                  prefixIcon: const Icon(Icons.flag, color: Colors.white70),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Colors.white30),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Colors.white30),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Colors.white, width: 2),
-                  ),
-                ),
+              SearchableDropdown(
+                label: 'Country',
+                hint: 'Select your country',
+                items: PreferenceData.countries,
+                selectedValue: _selectedCountry,
+                icon: Icons.flag,
+                popularItems: PreferenceData.getPopularCountries(),
+                onChanged: (value) {
+                  setState(() => _selectedCountry = value);
+                },
               ),
               const SizedBox(height: 16),
-              TextField(
-                controller: _cuisineController,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: 'Preferred Cuisine',
-                  labelStyle: const TextStyle(color: Colors.white70),
-                  hintText: 'e.g., Indian, Italian, Mexican',
-                  hintStyle: const TextStyle(color: Colors.white38),
-                  prefixIcon: const Icon(Icons.dinner_dining, color: Colors.white70),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Colors.white30),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Colors.white30),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Colors.white, width: 2),
-                  ),
-                ),
+              SearchableDropdown(
+                label: 'Preferred Cuisine',
+                hint: 'Select your favorite cuisine',
+                items: PreferenceData.cuisines,
+                selectedValue: _selectedCuisine,
+                icon: Icons.dinner_dining,
+                popularItems: PreferenceData.getPopularCuisines(),
+                onChanged: (value) {
+                  setState(() => _selectedCuisine = value);
+                },
               ),
             ],
           ),
@@ -317,60 +286,59 @@ class _UserPreferencesScreenState extends State<UserPreferencesScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionTitle('🥗 Dietary Restrictions'),
+        const SizedBox(height: 8),
+        Text(
+          'Select from ${PreferenceData.dietaryRestrictions.length}+ dietary restrictions',
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.7),
+            fontSize: 13,
+          ),
+        ),
         const SizedBox(height: 12),
         GlassContainer(
           padding: const EdgeInsets.all(16),
           borderRadius: 12,
           blur: 10,
           opacity: 0.2,
-          child: Wrap(
+          child: MultiSelectDropdown(
+            label: 'Select Dietary Restrictions',
+            hint: 'Tap to select',
+            items: PreferenceData.dietaryRestrictions,
+            selectedValues: _selectedRestrictions,
+            icon: Icons.restaurant,
+            onChanged: (values) {
+              setState(() => _selectedRestrictions = values);
+            },
+          ),
+        ),
+        if (_selectedRestrictions.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: DietaryRestrictions.all.map((restriction) {
-              final isSelected = _selectedRestrictions.contains(restriction);
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    if (isSelected) {
-                      _selectedRestrictions.remove(restriction);
-                    } else {
-                      _selectedRestrictions.add(restriction);
-                    }
-                  });
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: isSelected 
-                        ? Colors.white.withOpacity(0.3)
-                        : Colors.white.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isSelected ? Colors.white : Colors.white30,
-                      width: isSelected ? 2 : 1,
+            children: _selectedRestrictions.map((restriction) {
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.white60),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.check_circle, color: Colors.white, size: 14),
+                    const SizedBox(width: 4),
+                    Text(
+                      restriction,
+                      style: const TextStyle(color: Colors.white, fontSize: 13),
                     ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (isSelected)
-                        const Icon(Icons.check_circle, color: Colors.white, size: 18),
-                      if (isSelected) const SizedBox(width: 6),
-                      Text(
-                        restriction,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                        ),
-                      ),
-                    ],
-                  ),
+                  ],
                 ),
               );
             }).toList(),
           ),
-        ),
+        ],
       ],
     );
   }
@@ -382,7 +350,7 @@ class _UserPreferencesScreenState extends State<UserPreferencesScreen> {
         _buildSectionTitle('⚠️ Allergies'),
         const SizedBox(height: 8),
         Text(
-          'Select all that apply - we\'ll exclude these from recipe suggestions',
+          'Select from ${PreferenceData.allergens.length}+ allergens - we\'ll exclude these from recipe suggestions',
           style: TextStyle(
             color: Colors.white.withOpacity(0.7),
             fontSize: 13,
@@ -394,157 +362,50 @@ class _UserPreferencesScreenState extends State<UserPreferencesScreen> {
           borderRadius: 12,
           blur: 10,
           opacity: 0.2,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: CommonAllergens.all.map((allergen) {
-                  final isSelected = _selectedAllergies.contains(allergen);
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        if (isSelected) {
-                          _selectedAllergies.remove(allergen);
-                        } else {
-                          _selectedAllergies.add(allergen);
-                        }
-                      });
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: isSelected 
-                            ? Colors.red.withOpacity(0.4)
-                            : Colors.white.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: isSelected ? Colors.red.shade300 : Colors.white30,
-                          width: isSelected ? 2 : 1,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (isSelected)
-                            const Icon(Icons.warning, color: Colors.white, size: 18),
-                          if (isSelected) const SizedBox(width: 6),
-                          Text(
-                            allergen,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 16),
-              const Divider(color: Colors.white30),
-              const SizedBox(height: 8),
-              Text(
-                'Other Allergies',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.9),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _customAllergyController,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        hintText: 'Add custom allergy',
-                        hintStyle: const TextStyle(color: Colors.white38),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.white30),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.white30),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.white, width: 2),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  GestureDetector(
-                    onTap: () {
-                      final allergy = _customAllergyController.text.trim();
-                      if (allergy.isNotEmpty && !_customAllergies.contains(allergy)) {
-                        setState(() {
-                          _customAllergies.add(allergy);
-                          _customAllergyController.clear();
-                        });
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(Icons.add, color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-              if (_customAllergies.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: _customAllergies.map((allergy) {
-                    return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.4),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.red.shade300, width: 2),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            allergy,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _customAllergies.remove(allergy);
-                              });
-                            },
-                            child: const Icon(Icons.close, color: Colors.white, size: 16),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ],
-            ],
+          child: MultiSelectDropdown(
+            label: 'Select Allergies',
+            hint: 'Tap to select',
+            items: PreferenceData.allergens,
+            selectedValues: _selectedAllergies,
+            icon: Icons.warning,
+            highlightColor: Colors.red,
+            onChanged: (values) {
+              setState(() => _selectedAllergies = values);
+            },
           ),
         ),
+        if (_selectedAllergies.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _selectedAllergies.map((allergy) {
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.4),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.red.shade300, width: 2),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.warning, color: Colors.white, size: 14),
+                    const SizedBox(width: 4),
+                    Text(
+                      allergy,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        ],
       ],
     );
   }
@@ -556,7 +417,7 @@ class _UserPreferencesScreenState extends State<UserPreferencesScreen> {
         _buildSectionTitle('👎 Foods You Dislike'),
         const SizedBox(height: 8),
         Text(
-          'Add foods you prefer not to eat - we\'ll avoid them in suggestions',
+          'Select from ${PreferenceData.dislikedFoods.length}+ common disliked foods',
           style: TextStyle(
             color: Colors.white.withOpacity(0.7),
             fontSize: 13,
@@ -568,102 +429,45 @@ class _UserPreferencesScreenState extends State<UserPreferencesScreen> {
           borderRadius: 12,
           blur: 10,
           opacity: 0.2,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _customDislikeController,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        hintText: 'e.g., mushrooms, olives, cilantro',
-                        hintStyle: const TextStyle(color: Colors.white38),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.white30),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.white30),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.white, width: 2),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                      ),
-                      onSubmitted: (value) => _addDislikedFood(),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  GestureDetector(
-                    onTap: _addDislikedFood,
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(Icons.add, color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-              if (_dislikedFoods.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: _dislikedFoods.map((food) {
-                    return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.white60, width: 1),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            food,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _dislikedFoods.remove(food);
-                              });
-                            },
-                            child: const Icon(Icons.close, color: Colors.white, size: 16),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ],
-            ],
+          child: MultiSelectDropdown(
+            label: 'Select Disliked Foods',
+            hint: 'Tap to select',
+            items: PreferenceData.dislikedFoods,
+            selectedValues: _selectedDislikes,
+            icon: Icons.no_meals,
+            popularItems: PreferenceData.getCommonDislikes(),
+            onChanged: (values) {
+              setState(() => _selectedDislikes = values);
+            },
           ),
         ),
+        if (_selectedDislikes.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _selectedDislikes.map((food) {
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.white60),
+                ),
+                child: Text(
+                  food,
+                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
       ],
     );
   }
 
   void _addDislikedFood() {
-    final food = _customDislikeController.text.trim();
-    if (food.isNotEmpty && !_dislikedFoods.contains(food)) {
-      setState(() {
-        _dislikedFoods.add(food);
-        _customDislikeController.clear();
-      });
-    }
+    // This method is no longer needed with dropdown
   }
 
   Widget _buildSaveButton() {
