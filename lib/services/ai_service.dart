@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/pantry_item.dart';
 import '../models/shopping_list_item.dart';
+import '../models/user_preferences.dart';
 
 /// Comprehensive AI Service for Pantory App
 /// Provides all 5 AI enhancement categories:
@@ -756,14 +757,14 @@ class AIService {
     }
 
     return ChatResponse(
-      message: '👋 Hey there, friend! How are you feeling today? I\'d love to chat with you and maybe suggest some delicious food to brighten your day! 😊',
-      suggestions: ['Excellent 😄', 'Great 😊', 'Good 🙂', 'Okay 😐', 'Not great 😔'],
+      message: '👋 Hey there, friend! How are you feeling today? Just tell me in your own words - I can understand! 😊',
+      suggestions: ['Tell me how you\'re feeling', 'I\'m feeling...', 'Today has been...'],
       action: 'mood_check',
     );
   }
 
-  /// Respond to user's mood and have a conversation
-  Future<ChatResponse> respondToMood(String mood, List<PantryItem> pantryItems) async {
+  /// Respond to user's mood with automatic detection from natural language
+  Future<ChatResponse> respondToMood(String userMessage, List<PantryItem> pantryItems) async {
     if (!_aiEnabled) {
       return ChatResponse(
         message: 'AI assistant is currently disabled',
@@ -771,12 +772,14 @@ class AIService {
       );
     }
 
-    final lowerMood = mood.toLowerCase();
+    // Detect mood from user's natural language
+    final detectedMood = detectMoodFromText(userMessage);
+    final lowerMessage = userMessage.toLowerCase();
 
     // Excellent mood responses
-    if (lowerMood.contains('excellent') || lowerMood.contains('😄')) {
+    if (detectedMood == 'excellent' || lowerMessage.contains('excellent') || lowerMessage.contains('😄')) {
       return ChatResponse(
-        message: '🌟 That\'s amazing! I\'m so happy to hear you\'re feeling excellent! You\'re radiating positive energy! Let\'s keep this momentum going with some delicious food. What sounds good to you right now?',
+        message: '🌟 That\'s amazing! I can feel your positive energy through your words! You\'re radiating happiness! Let\'s keep this momentum going with some delicious food. What sounds good to you right now?',
         suggestions: [
           'Something light & refreshing',
           'Comfort food',
@@ -788,9 +791,9 @@ class AIService {
     }
 
     // Great mood responses
-    if (lowerMood.contains('great') || lowerMood.contains('😊')) {
+    if (detectedMood == 'great' || lowerMessage.contains('great') || lowerMessage.contains('😊')) {
       return ChatResponse(
-        message: '😊 That\'s wonderful! I love seeing you in such good spirits! You know what could make this great day even better? Some amazing food! Tell me, what are you in the mood for?',
+        message: '😊 That\'s wonderful! I can tell you\'re in great spirits from the way you\'re talking! You know what could make this great day even better? Some amazing food! Tell me, what are you in the mood for?',
         suggestions: [
           'Something adventurous',
           'Quick & easy',
@@ -802,9 +805,9 @@ class AIService {
     }
 
     // Good mood responses
-    if (lowerMood.contains('good') || lowerMood.contains('🙂')) {
+    if (detectedMood == 'good' || lowerMessage.contains('good') || lowerMessage.contains('🙂')) {
       return ChatResponse(
-        message: '🙂 Good is great! Let\'s elevate that to "great" or even "excellent" with some tasty food! Food has this magical way of lifting our spirits, don\'t you think? What would make you smile right now?',
+        message: '🙂 Good is great! I can tell from your words - let\'s elevate that to "great" or even "excellent" with some tasty food! Food has this magical way of lifting our spirits, don\'t you think? What would make you smile right now?',
         suggestions: [
           'Comfort food',
           'Something new to try',
@@ -816,9 +819,9 @@ class AIService {
     }
 
     // Okay/neutral mood responses
-    if (lowerMood.contains('okay') || lowerMood.contains('😐')) {
+    if (detectedMood == 'okay' || lowerMessage.contains('okay') || lowerMessage.contains('😐')) {
       return ChatResponse(
-        message: '💭 I hear you! Sometimes we just feel "okay," and that\'s totally fine. But you know what? Let\'s try to turn that okay into something better! Good food can really work wonders for our mood. How about we find something that might bring a smile to your face?',
+        message: '💭 I hear you! I can sense you\'re feeling just okay right now, and that\'s totally fine. But you know what? Let\'s try to turn that okay into something better! Good food can really work wonders for our mood. How about we find something that might bring a smile to your face?',
         suggestions: [
           'Comfort food (always works!)',
           'Something fresh',
@@ -830,9 +833,9 @@ class AIService {
     }
 
     // Not great/bad mood responses
-    if (lowerMood.contains('not') || lowerMood.contains('bad') || lowerMood.contains('😔')) {
+    if (detectedMood == 'bad' || lowerMessage.contains('not') || lowerMessage.contains('bad') || lowerMessage.contains('😔')) {
       return ChatResponse(
-        message: '🤗 Hey, I\'m here for you! We all have those days, and it\'s okay. Let me be your friend and help cheer you up! You know what\'s proven to help? Good food and good company (even if it\'s AI company 😊). Let\'s find something that might make you feel better. What sounds comforting right now?',
+        message: '🤗 Hey, I\'m here for you! I can tell from your words that today\'s been tough, and that\'s okay. We all have those days. Let me be your friend and help cheer you up! You know what\'s proven to help? Good food and good company (even if it\'s AI company 😊). Let\'s find something that might make you feel better. What sounds comforting right now?',
         suggestions: [
           'Ultimate comfort food',
           'Something warm & cozy',
@@ -845,17 +848,18 @@ class AIService {
 
     // Default response
     return ChatResponse(
-      message: '😊 Thanks for sharing! Let\'s find some great food to match your vibe. What are you craving?',
+      message: '😊 Thanks for sharing! I\'m picking up on your vibe from what you\'re saying. Let\'s find some great food to match how you\'re feeling. What are you craving?',
       suggestions: ['Something savory', 'Something sweet', 'Healthy option', 'Surprise me'],
       action: 'food_preference',
     );
   }
 
-  /// Get mood-based recipe suggestions
+  /// Get mood-based recipe suggestions with user preferences
   Future<MoodRecipeResponse> getMoodBasedRecipes(
     String mood,
     String foodPreference,
     List<PantryItem> pantryItems,
+    {UserPreferences? userPreferences}
   ) async {
     if (!_aiEnabled) {
       return MoodRecipeResponse(
@@ -866,7 +870,16 @@ class AIService {
     }
 
     final ingredients = pantryItems.map((item) => item.name.toLowerCase()).toList();
-    final recipes = <MoodRecipe>[];
+    var recipes = <MoodRecipe>[];
+
+    // Add localized recipes based on user's country/cuisine preference
+    if (userPreferences?.country != null || userPreferences?.preferredCuisine != null) {
+      recipes.addAll(_getLocalizedRecipes(
+        userPreferences?.country,
+        userPreferences?.preferredCuisine,
+        mood,
+      ));
+    }
 
     // Determine recipes based on mood and preference
     final preference = foodPreference.toLowerCase();
@@ -885,10 +898,29 @@ class AIService {
       recipes.addAll(_getHealthyRecipes(ingredients, mood).take(1));
     }
 
+    // Filter recipes based on user preferences (allergies, dietary restrictions, dislikes)
+    if (userPreferences != null && userPreferences.hasRestrictions()) {
+      recipes = recipes.where((recipe) => _isRecipeSuitableForUser(recipe, userPreferences)).toList();
+      
+      if (recipes.isEmpty) {
+        return MoodRecipeResponse(
+          message: 'I\'ve considered your dietary preferences and allergies, but I need to suggest some alternative options that work for you. Let me know if you\'d like to adjust your preferences! 💚',
+          recipes: [],
+          moodMessage: 'Your health and preferences are important to me!',
+          conversationContinuation: 'Would you like to update your dietary preferences or try a different food category?',
+        );
+      }
+    }
+
     final moodMessage = _getMoodElevationMessage(mood, recipes.length);
+    
+    String message = 'Here are some recipes I think you\'ll love! Each one is chosen with care to help elevate your mood 💚';
+    if (userPreferences != null && userPreferences.hasRestrictions()) {
+      message = 'Here are some recipes tailored to your preferences and dietary needs! Each one is chosen with care to help elevate your mood 💚';
+    }
 
     return MoodRecipeResponse(
-      message: 'Here are some recipes I think you\'ll love! Each one is chosen with care to help elevate your mood 💚',
+      message: message,
       recipes: recipes,
       moodMessage: moodMessage,
       conversationContinuation: 'Would you like to try one of these, or should we keep chatting? I\'m here for you! 😊',
@@ -1014,6 +1046,154 @@ class AIService {
   // ==========================================
   // HELPER METHODS
   // ==========================================
+
+  /// Detect mood from natural language text using sentiment analysis
+  /// This analyzes the user's speech patterns, word choice, and emotional indicators
+  String detectMoodFromText(String text) {
+    final lower = text.toLowerCase();
+    
+    // Positive indicators for excellent mood
+    final excellentIndicators = [
+      'amazing', 'fantastic', 'incredible', 'wonderful', 'brilliant', 
+      'outstanding', 'perfect', 'excellent', 'superb', 'fabulous', 
+      'thrilled', 'ecstatic', 'overjoyed', 'blessed', 'phenomenal',
+      'best day', 'love it', 'so happy', 'couldn\'t be better'
+    ];
+    
+    // Positive indicators for great mood
+    final greatIndicators = [
+      'great', 'good', 'nice', 'happy', 'pleased', 'satisfied',
+      'glad', 'cheerful', 'content', 'positive', 'well', 'fine',
+      'pretty good', 'doing good', 'feeling good', 'not bad'
+    ];
+    
+    // Neutral/okay indicators
+    final okayIndicators = [
+      'okay', 'ok', 'alright', 'fine', 'so-so', 'average', 'normal',
+      'nothing special', 'could be better', 'meh', 'neutral'
+    ];
+    
+    // Negative indicators for bad mood
+    final badIndicators = [
+      'bad', 'terrible', 'awful', 'horrible', 'sad', 'down', 'upset',
+      'depressed', 'miserable', 'unhappy', 'stressed', 'anxious',
+      'worried', 'frustrated', 'angry', 'tired', 'exhausted',
+      'not good', 'not great', 'rough', 'tough', 'hard day',
+      'struggling', 'overwhelmed', 'annoyed', 'irritated'
+    ];
+    
+    // Count mood indicators
+    int excellentScore = 0;
+    int greatScore = 0;
+    int okayScore = 0;
+    int badScore = 0;
+    
+    for (final indicator in excellentIndicators) {
+      if (lower.contains(indicator)) excellentScore += 2;
+    }
+    
+    for (final indicator in greatIndicators) {
+      if (lower.contains(indicator)) greatScore += 1;
+    }
+    
+    for (final indicator in okayIndicators) {
+      if (lower.contains(indicator)) okayScore += 1;
+    }
+    
+    for (final indicator in badIndicators) {
+      if (lower.contains(indicator)) badScore += 2;
+    }
+    
+    // Check for negations (e.g., "not good" should be bad)
+    if (lower.contains('not ') || lower.contains('don\'t ') || lower.contains('can\'t ')) {
+      if (greatScore > 0) {
+        badScore += greatScore;
+        greatScore = 0;
+      }
+      if (excellentScore > 0) {
+        badScore += excellentScore;
+        excellentScore = 0;
+      }
+    }
+    
+    // Check for emoticons/emojis
+    if (text.contains('😄') || text.contains('😁') || text.contains('🤩') || 
+        text.contains('😊') || text.contains('🙂')) {
+      greatScore += 1;
+    }
+    if (text.contains('😐') || text.contains('😑')) {
+      okayScore += 1;
+    }
+    if (text.contains('😔') || text.contains('😢') || text.contains('😞') || 
+        text.contains('😟') || text.contains('😩')) {
+      badScore += 2;
+    }
+    
+    // Determine mood based on highest score
+    final scores = {
+      'excellent': excellentScore,
+      'great': greatScore,
+      'okay': okayScore,
+      'bad': badScore,
+    };
+    
+    final maxScore = scores.values.reduce((a, b) => a > b ? a : b);
+    
+    if (maxScore == 0) {
+      return 'okay'; // Default if no clear indicators
+    }
+    
+    return scores.entries
+        .firstWhere((entry) => entry.value == maxScore)
+        .key;
+  }
+
+  /// Filter recipes based on user preferences (dietary restrictions, allergies, dislikes)
+  bool _isRecipeSuitableForUser(MoodRecipe recipe, UserPreferences? preferences) {
+    if (preferences == null || !preferences.hasRestrictions()) {
+      return true; // No restrictions, all recipes suitable
+    }
+    
+    // Check each ingredient against user preferences
+    for (final ingredient in recipe.ingredients) {
+      if (!preferences.isIngredientAllowed(ingredient)) {
+        return false; // Contains allergen or disliked food
+      }
+    }
+    
+    // Check dietary restrictions
+    final recipeCategories = recipe.ingredients.map((i) => i.toLowerCase()).toList();
+    if (!preferences.meetsRestrictions(recipeCategories)) {
+      return false; // Doesn't meet dietary restrictions
+    }
+    
+    return true;
+  }
+
+  /// Get cuisine-specific recipes based on user's country/preference
+  List<MoodRecipe> _getLocalizedRecipes(String? country, String? cuisine, String mood) {
+    // This would be expanded with real regional recipes
+    // For now, returning placeholder that shows the concept
+    
+    if (country != null || cuisine != null) {
+      final region = cuisine ?? country ?? 'International';
+      
+      return [
+        MoodRecipe(
+          name: '$region Comfort Bowl',
+          description: 'A traditional comfort dish from your region, customized for your mood',
+          moodBoost: 'Familiar flavors from home can provide deep emotional comfort',
+          prepTime: 30,
+          difficulty: 'Medium',
+          ingredients: ['local staples', 'seasonal vegetables', 'aromatic spices'],
+          instructions: '1. Use traditional cooking methods\n2. Add local ingredients\n3. Season to your taste',
+          emoji: '🍲',
+        ),
+      ];
+    }
+    
+    return [];
+  }
 
   Map<String, dynamic> _parseItemFromCommand(String command) {
     // Simple parsing (would use NLP in production)
