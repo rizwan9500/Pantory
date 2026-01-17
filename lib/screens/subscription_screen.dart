@@ -4,6 +4,7 @@ import '../services/auth_service.dart';
 import '../services/subscription_service.dart';
 import '../models/subscription_plan.dart';
 import '../models/user_model.dart';
+import 'payment_screen.dart';
 
 class SubscriptionScreen extends StatelessWidget {
   const SubscriptionScreen({super.key});
@@ -274,13 +275,24 @@ class SubscriptionScreen extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: subscriptionService.isProcessing
                     ? null
-                    : () => _handleSubscribe(
+                    : () {
+                        if (user == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Please log in to subscribe'),
+                            ),
+                          );
+                          return;
+                        }
+
+                        // Navigate to payment screen with UPI/QR options
+                        Navigator.push(
                           context,
-                          plan,
-                          subscriptionService,
-                          authService,
-                          user,
-                        ),
+                          MaterialPageRoute(
+                            builder: (context) => PaymentScreen(plan: plan),
+                          ),
+                        );
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: plan.isPopular ? Colors.amber : Colors.green,
                   foregroundColor: Colors.white,

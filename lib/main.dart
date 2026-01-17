@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/home_screen.dart';
@@ -17,6 +15,7 @@ import 'screens/analytics_screen.dart';
 import 'screens/help_screen.dart';
 import 'screens/terms_screen.dart';
 import 'screens/privacy_screen.dart';
+import 'screens/payment_screen.dart';
 import 'services/auth_service.dart';
 import 'services/subscription_service.dart';
 import 'services/pantry_service.dart';
