@@ -1,12 +1,82 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../services/auth_service.dart';
+import '../services/pantry_service.dart';
 import '../models/user_model.dart';
+import '../models/mood_model.dart';
 import '../widgets/animated_gradient_background.dart';
 import '../widgets/glass_container.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  MoodType? _currentMood;
+  List<MoodModel> _moodHistory = [];
+  Map<String, int> _userStats = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMoodHistory();
+    _loadUserStats();
+  }
+
+  Future<void> _loadMoodHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    final moodHistoryJson = prefs.getStringList('mood_history') ?? [];
+    setState(() {
+      _moodHistory = moodHistoryJson
+          .map((json) => MoodModel.fromJson(jsonDecode(json)))
+          .toList();
+      if (_moodHistory.isNotEmpty) {
+        _currentMood = MoodType.fromString(_moodHistory.first.mood);
+      }
+    });
+  }
+
+  Future<void> _saveMood(MoodType mood, String? note) async {
+    final moodModel = MoodModel(
+      mood: mood.label,
+      timestamp: DateTime.now(),
+      note: note,
+    );
+
+    _moodHistory.insert(0, moodModel);
+    if (_moodHistory.length > 30) {
+      _moodHistory = _moodHistory.sublist(0, 30);
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final moodHistoryJson = _moodHistory
+        .map((mood) => jsonEncode(mood.toJson()))
+        .toList();
+    await prefs.setStringList('mood_history', moodHistoryJson);
+
+    setState(() {
+      _currentMood = mood;
+    });
+  }
+
+  Future<void> _loadUserStats() async {
+    final pantryService = Provider.of<PantryService>(context, listen: false);
+    final items = pantryService.items;
+    
+    setState(() {
+      _userStats = {
+        'totalItems': items.length,
+        'categories': items.map((i) => i.category).toSet().length,
+        'favorites': items.where((i) => i.isFavorite).length,
+        'moodCheckins': _moodHistory.length,
+      };
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -217,6 +287,16 @@ class ProfileScreen extends StatelessWidget {
                   color: Colors.white70,
                 ),
               ),
+              
+              const SizedBox(height: 32),
+              
+              // Mood Tracker Card
+              _buildMoodTrackerCard(context),
+              
+              const SizedBox(height: 16),
+              
+              // User Statistics Card
+              _buildStatisticsCard(context),
               
               const SizedBox(height: 32),
               
@@ -505,6 +585,355 @@ class ProfileScreen extends StatelessWidget {
       if (context.mounted) {
         Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
       }
+    }
+  }
+
+  Widget _buildMoodTrackerCard(BuildContext context) {
+    return GlassContainer(
+      padding: const EdgeInsets.all(20),
+      borderRadius: 16,
+      blur: 12,
+      opacity: 0.25,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.mood, color: Colors.white, size: 24),
+              const SizedBox(width: 12),
+              const Text(
+                'How are you feeling today?',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (_currentMood != null) ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    _currentMood!.emoji,
+                    style: const TextStyle(fontSize: 32),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Feeling ${_currentMood!.label}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => _showMoodSelector(context),
+              icon: const Icon(Icons.edit),
+              label: Text(_currentMood == null ? 'Track Your Mood' : 'Update Mood'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white.withOpacity(0.2),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+            ),
+          ),
+          if (_moodHistory.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: () => _showMoodHistory(context),
+              child: const Text(
+                'View Mood History',
+                style: TextStyle(color: Colors.white70),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatisticsCard(BuildContext context) {
+    return GlassContainer(
+      padding: const EdgeInsets.all(20),
+      borderRadius: 16,
+      blur: 12,
+      opacity: 0.25,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.analytics, color: Colors.white, size: 24),
+              const SizedBox(width: 12),
+              const Text(
+                'Your Activity',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatItem(
+                  '📦',
+                  '${_userStats['totalItems'] ?? 0}',
+                  'Items',
+                ),
+              ),
+              Expanded(
+                child: _buildStatItem(
+                  '📁',
+                  '${_userStats['categories'] ?? 0}',
+                  'Categories',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatItem(
+                  '⭐',
+                  '${_userStats['favorites'] ?? 0}',
+                  'Favorites',
+                ),
+              ),
+              Expanded(
+                child: _buildStatItem(
+                  '😊',
+                  '${_userStats['moodCheckins'] ?? 0}',
+                  'Mood Check-ins',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem(String emoji, String value, String label) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          Text(
+            emoji,
+            style: const TextStyle(fontSize: 28),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showMoodSelector(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => GlassContainer(
+        blur: 20,
+        opacity: 0.3,
+        borderRadius: 24,
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'How are you feeling?',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 24),
+              ...MoodType.values.map((mood) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: ListTile(
+                  onTap: () {
+                    _saveMood(mood, null);
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Mood tracked! Talk to AI Assistant for mood-based recipe suggestions!'),
+                        action: SnackBarAction(
+                          label: 'Open AI',
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/ai-assistant');
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                  leading: Text(
+                    mood.emoji,
+                    style: const TextStyle(fontSize: 32),
+                  ),
+                  title: Text(
+                    mood.label,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  tileColor: Colors.white.withOpacity(0.1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              )).toList(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showMoodHistory(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) => GlassContainer(
+          blur: 20,
+          opacity: 0.3,
+          borderRadius: 24,
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Mood History',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: ListView.builder(
+                    controller: scrollController,
+                    itemCount: _moodHistory.length,
+                    itemBuilder: (context, index) {
+                      final mood = _moodHistory[index];
+                      final moodType = MoodType.fromString(mood.mood);
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              Text(
+                                moodType.emoji,
+                                style: const TextStyle(fontSize: 32),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      mood.mood,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      _formatDateTime(mood.timestamp),
+                                      style: const TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatDateTime(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inMinutes < 60) {
+      return '${difference.inMinutes} minutes ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours} hours ago';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays} days ago';
+    } else {
+      return _formatDate(date);
     }
   }
 }

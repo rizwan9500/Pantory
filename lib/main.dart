@@ -18,6 +18,7 @@ import 'screens/help_screen.dart';
 import 'screens/terms_screen.dart';
 import 'screens/privacy_screen.dart';
 import 'screens/payment_screen.dart';
+import 'screens/ai_assistant_screen.dart';
 import 'services/auth_service.dart';
 import 'services/subscription_service.dart';
 import 'services/pantry_service.dart';
@@ -87,6 +88,7 @@ class PantoryApp extends StatelessWidget {
           '/help': (context) => const HelpScreen(),
           '/terms': (context) => const TermsScreen(),
           '/privacy': (context) => const PrivacyScreen(),
+          '/ai-assistant': (context) => const AIAssistantScreen(),
         },
       ),
     );
