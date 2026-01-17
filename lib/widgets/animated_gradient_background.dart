@@ -1,9 +1,19 @@
 import 'package:flutter/material.dart';
 
+/// Gradient theme enum for predefined color schemes
+enum GradientTheme {
+  green,
+  blue,
+  purple,
+  orange,
+  teal,
+}
+
 /// An animated gradient background widget
 class AnimatedGradientBackground extends StatefulWidget {
   final Widget child;
-  final List<Color> colors;
+  final List<Color>? colors;
+  final GradientTheme? theme;
   final Duration duration;
   final AlignmentGeometry begin;
   final AlignmentGeometry end;
@@ -11,16 +21,28 @@ class AnimatedGradientBackground extends StatefulWidget {
   const AnimatedGradientBackground({
     super.key,
     required this.child,
-    this.colors = const [
-      Color(0xFF4CAF50),
-      Color(0xFF45B649),
-      Color(0xFF66BB6A),
-      Color(0xFF81C784),
-    ],
+    this.colors,
+    this.theme,
     this.duration = const Duration(seconds: 3),
     this.begin = Alignment.topLeft,
     this.end = Alignment.bottomRight,
   });
+  
+  List<Color> get effectiveColors {
+    if (colors != null) return colors!;
+    switch (theme ?? GradientTheme.green) {
+      case GradientTheme.green:
+        return GradientThemes.greenTheme;
+      case GradientTheme.blue:
+        return GradientThemes.blueTheme;
+      case GradientTheme.purple:
+        return GradientThemes.purpleTheme;
+      case GradientTheme.orange:
+        return GradientThemes.orangeTheme;
+      case GradientTheme.teal:
+        return GradientThemes.tealTheme;
+    }
+  }
 
   @override
   State<AnimatedGradientBackground> createState() =>
@@ -54,6 +76,7 @@ class _AnimatedGradientBackgroundState
 
   @override
   Widget build(BuildContext context) {
+    final colors = widget.effectiveColors;
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
@@ -64,18 +87,18 @@ class _AnimatedGradientBackgroundState
               end: widget.end,
               colors: [
                 Color.lerp(
-                  widget.colors[0],
-                  widget.colors[1],
+                  colors[0],
+                  colors[1],
                   _animation.value,
                 )!,
                 Color.lerp(
-                  widget.colors[1],
-                  widget.colors[2],
+                  colors[1],
+                  colors[2],
                   _animation.value,
                 )!,
                 Color.lerp(
-                  widget.colors[2],
-                  widget.colors[3],
+                  colors[2],
+                  colors[3],
                   _animation.value,
                 )!,
               ],

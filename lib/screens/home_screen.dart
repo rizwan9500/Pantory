@@ -4,6 +4,8 @@ import '../services/auth_service.dart';
 import '../services/pantry_service.dart';
 import '../models/user_model.dart';
 import '../models/pantry_item.dart';
+import '../widgets/animated_gradient_background.dart';
+import '../widgets/glass_container.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -30,16 +32,21 @@ class _HomeScreenState extends State<HomeScreen> {
     final isAuthenticated = authService.isAuthenticated;
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Pantory'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text('Pantory', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         actions: [
           if (user?.isTrialActive == true)
             Container(
               margin: const EdgeInsets.only(right: 16),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.amber,
+                color: Colors.white.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.white.withOpacity(0.3)),
               ),
               child: Text(
                 'Trial: ${user!.trialDaysRemaining} days left',
@@ -51,57 +58,81 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           IconButton(
-            icon: const Icon(Icons.notifications),
+            icon: const Icon(Icons.notifications, color: Colors.white),
             onPressed: () {
               // Show notifications
             },
           ),
         ],
       ),
-      body: IndexedStack(
-        index: _selectedIndex,
+      body: Stack(
         children: [
-          _buildHomeTab(context, user, pantryService),
-          _buildSearchTab(context, user, pantryService),
-          _buildFavoritesTab(context, user, pantryService),
-          isAuthenticated ? const SizedBox.shrink() : _buildGuestPrompt(context),
+          const AnimatedGradientBackground(
+            theme: GradientTheme.green,
+            child: SizedBox.expand(),
+          ),
+          SafeArea(
+            child: IndexedStack(
+              index: _selectedIndex,
+              children: [
+                _buildHomeTab(context, user, pantryService),
+                _buildSearchTab(context, user, pantryService),
+                _buildFavoritesTab(context, user, pantryService),
+                isAuthenticated ? const SizedBox.shrink() : _buildGuestPrompt(context),
+              ],
+            ),
+          ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.green,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Search',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Favorites',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.1),
+          border: Border(top: BorderSide(color: Colors.white.withOpacity(0.2))),
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          onTap: (index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+          },
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.transparent,
+          selectedItemColor: Colors.white,
+          unselectedItemColor: Colors.white.withOpacity(0.6),
+          elevation: 0,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.search),
+              label: 'Search',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.favorite),
+              label: 'Favorites',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Profile',
+            ),
+          ],
+        ),
       ),
       floatingActionButton: _selectedIndex == 0
-          ? FloatingActionButton(
-              onPressed: () {
-                _showAddItemDialog(context, user);
-              },
-              backgroundColor: Colors.green,
-              child: const Icon(Icons.add),
+          ? GlassContainer(
+              blur: 10,
+              opacity: 0.2,
+              borderRadius: 16,
+              padding: const EdgeInsets.all(16),
+              child: InkWell(
+                onTap: () {
+                  _showAddItemDialog(context, user);
+                },
+                child: const Icon(Icons.add, color: Colors.white, size: 28),
+              ),
             )
           : null,
     );
@@ -125,6 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
             
@@ -136,7 +168,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   : 'Sign up to unlock all features',
               style: const TextStyle(
                 fontSize: 16,
-                color: Colors.grey,
+                color: Colors.white70,
               ),
             ),
             
@@ -179,27 +211,43 @@ class _HomeScreenState extends State<HomeScreen> {
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/shopping-list');
-                    },
-                    icon: const Icon(Icons.shopping_cart),
-                    label: const Text('Shopping List'),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: GlassContainer(
+                    blur: 10,
+                    opacity: 0.15,
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/shopping-list');
+                      },
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.shopping_cart, color: Colors.white),
+                          SizedBox(width: 8),
+                          Text('Shopping List', style: TextStyle(color: Colors.white)),
+                        ],
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/analytics');
-                    },
-                    icon: const Icon(Icons.analytics),
-                    label: const Text('Analytics'),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: GlassContainer(
+                    blur: 10,
+                    opacity: 0.15,
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/analytics');
+                      },
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.analytics, color: Colors.white),
+                          SizedBox(width: 8),
+                          Text('Analytics', style: TextStyle(color: Colors.white)),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -214,6 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
             
@@ -225,24 +274,35 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   children: [
                     const SizedBox(height: 32),
-                    Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey[400]),
+                    Icon(Icons.inventory_2_outlined, size: 64, color: Colors.white.withOpacity(0.5)),
                     const SizedBox(height: 16),
                     Text(
                       'No items in your pantry yet',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                      style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 16),
                     ),
                     const SizedBox(height: 8),
-                    TextButton.icon(
-                      onPressed: () async {
-                        await pantryService.addSampleData();
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Sample items added!')),
-                          );
-                        }
-                      },
-                      icon: const Icon(Icons.add),
-                      label: const Text('Add Sample Items'),
+                    GlassContainer(
+                      blur: 10,
+                      opacity: 0.15,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: InkWell(
+                        onTap: () async {
+                          await pantryService.addSampleData();
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Sample items added!')),
+                            );
+                          }
+                        },
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.add, color: Colors.white),
+                            SizedBox(width: 8),
+                            Text('Add Sample Items', style: TextStyle(color: Colors.white)),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -274,28 +334,33 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          TextField(
-            decoration: InputDecoration(
-              hintText: 'Search your pantry...',
-              prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+          GlassContainer(
+            blur: 10,
+            opacity: 0.15,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: TextField(
+              decoration: const InputDecoration(
+                hintText: 'Search your pantry...',
+                hintStyle: TextStyle(color: Colors.white60),
+                prefixIcon: Icon(Icons.search, color: Colors.white),
+                border: InputBorder.none,
               ),
+              style: const TextStyle(color: Colors.white),
+              onChanged: (value) {
+                setState(() {
+                  // Trigger rebuild to show search results
+                });
+              },
+              controller: _searchController,
             ),
-            onChanged: (value) {
-              setState(() {
-                // Trigger rebuild to show search results
-              });
-            },
-            controller: _searchController,
           ),
           const SizedBox(height: 24),
           Expanded(
             child: _searchController.text.isEmpty
-                ? const Center(
+                ? Center(
                     child: Text(
                       'Search for items in your pantry',
-                      style: TextStyle(color: Colors.grey),
+                      style: TextStyle(color: Colors.white.withOpacity(0.7)),
                     ),
                   )
                 : ListView.builder(
@@ -330,43 +395,47 @@ class _HomeScreenState extends State<HomeScreen> {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
           ),
           const SizedBox(height: 24),
           if (!isPro)
-            Container(
+            GlassContainer(
+              blur: 10,
+              opacity: 0.15,
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.amber[50],
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.amber),
-              ),
               child: Column(
                 children: [
-                  const Icon(Icons.lock, size: 48, color: Colors.amber),
+                  const Icon(Icons.lock, size: 48, color: Colors.white),
                   const SizedBox(height: 16),
                   const Text(
                     'Favorites is a Pro Feature',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     'Upgrade to Pro to save your favorite items',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(color: Colors.white.withOpacity(0.7)),
                   ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/subscription');
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.amber,
+                  GlassContainer(
+                    blur: 10,
+                    opacity: 0.2,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/subscription');
+                      },
+                      child: const Text(
+                        'Upgrade Now',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
                     ),
-                    child: const Text('Upgrade Now'),
                   ),
                 ],
               ),
@@ -374,10 +443,10 @@ class _HomeScreenState extends State<HomeScreen> {
           else
             Expanded(
               child: pantryService.favoriteItems.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Text(
                         'No favorite items yet',
-                        style: TextStyle(color: Colors.grey),
+                        style: TextStyle(color: Colors.white.withOpacity(0.7)),
                       ),
                     )
                   : ListView.builder(
@@ -407,7 +476,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.person_outline, size: 100, color: Colors.grey),
+            Icon(Icons.person_outline, size: 100, color: Colors.white.withOpacity(0.7)),
             const SizedBox(height: 24),
             const Text(
               'Sign in to access your profile',
@@ -415,31 +484,44 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Create an account to unlock all features and start your 7-day free trial',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: Colors.white.withOpacity(0.7)),
             ),
             const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/login');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
+            GlassContainer(
+              blur: 10,
+              opacity: 0.2,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              child: InkWell(
+                onTap: () {
+                  Navigator.pushNamed(context, '/login');
+                },
+                child: const Text(
+                  'Sign In',
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
               ),
-              child: const Text('Sign In'),
             ),
             const SizedBox(height: 16),
-            TextButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/signup');
-              },
-              child: const Text('Create Account'),
+            GlassContainer(
+              blur: 10,
+              opacity: 0.15,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              child: InkWell(
+                onTap: () {
+                  Navigator.pushNamed(context, '/signup');
+                },
+                child: const Text(
+                  'Create Account',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
             ),
           ],
         ),
@@ -448,30 +530,28 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildStatCard(String title, String value, IconData icon, Color color) {
-    return Container(
+    return GlassContainer(
+      blur: 10,
+      opacity: 0.15,
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
       child: Column(
         children: [
-          Icon(icon, size: 32, color: color),
+          Icon(icon, size: 32, color: Colors.white),
           const SizedBox(height: 8),
           Text(
             value,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: color,
+              color: Colors.white,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
-              color: Colors.grey,
+              color: Colors.white.withOpacity(0.7),
             ),
           ),
         ],
@@ -482,120 +562,140 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildItemCard(String name, String category, String status, bool isLocked, String itemId, PantryService pantryService) {
     final item = pantryService.items.firstWhere((i) => i.id == itemId, orElse: () => pantryService.items.first);
     
-    return Card(
+    return GlassContainer(
+      blur: 10,
+      opacity: 0.15,
       margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: item.isExpired 
-              ? Colors.red[100] 
-              : item.isExpiringSoon 
-                  ? Colors.orange[100] 
-                  : Colors.green[100],
-          child: Icon(
-            isLocked ? Icons.lock : Icons.inventory_2,
-            color: item.isExpired 
-                ? Colors.red 
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        children: [
+          CircleAvatar(
+            backgroundColor: item.isExpired 
+                ? Colors.red.withOpacity(0.3)
                 : item.isExpiringSoon 
-                    ? Colors.orange 
-                    : Colors.green,
-          ),
-        ),
-        title: Text(name),
-        subtitle: Text('$category • $status'),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: Icon(
-                item.isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: item.isFavorite ? Colors.red : null,
-              ),
-              onPressed: () async {
-                await pantryService.toggleFavorite(itemId);
-              },
+                    ? Colors.orange.withOpacity(0.3)
+                    : Colors.green.withOpacity(0.3),
+            child: Icon(
+              isLocked ? Icons.lock : Icons.inventory_2,
+              color: Colors.white,
             ),
-            PopupMenuButton<String>(
-              onSelected: (value) async {
-                if (value == 'delete') {
-                  final confirmed = await showDialog<bool>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('Delete Item'),
-                      content: Text('Are you sure you want to delete "$name"?'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, false),
-                          child: const Text('Cancel'),
-                        ),
-                        ElevatedButton(
-                          onPressed: () => Navigator.pop(context, true),
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                          child: const Text('Delete'),
-                        ),
-                      ],
-                    ),
-                  );
-                  
-                  if (confirmed == true) {
-                    await pantryService.deleteItem(itemId);
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('$name deleted')),
-                      );
-                    }
-                  }
-                } else if (value == 'edit') {
-                  _showEditItemDialog(context, item, pantryService);
-                } else if (value == 'add_to_shopping') {
-                  await pantryService.addToShoppingList(
-                    name: item.name,
-                    category: item.category,
-                    quantity: item.quantity,
-                    unit: item.unit,
-                  );
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '$category • $status',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.white.withOpacity(0.7),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: Icon(
+              item.isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: item.isFavorite ? Colors.red[300] : Colors.white,
+            ),
+            onPressed: () async {
+              await pantryService.toggleFavorite(itemId);
+            },
+          ),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, color: Colors.white),
+            onSelected: (value) async {
+              if (value == 'delete') {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Delete Item'),
+                    content: Text('Are you sure you want to delete "$name"?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: const Text('Cancel'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                        child: const Text('Delete'),
+                      ),
+                    ],
+                  ),
+                );
+                
+                if (confirmed == true) {
+                  await pantryService.deleteItem(itemId);
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('${item.name} added to shopping list')),
+                      SnackBar(content: Text('$name deleted')),
                     );
                   }
                 }
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                const PopupMenuItem(value: 'add_to_shopping', child: Text('Add to Shopping List')),
-                const PopupMenuItem(value: 'delete', child: Text('Delete')),
-              ],
-            ),
-          ],
-        ),
+              } else if (value == 'edit') {
+                _showEditItemDialog(context, item, pantryService);
+              } else if (value == 'add_to_shopping') {
+                await pantryService.addToShoppingList(
+                  name: item.name,
+                  category: item.category,
+                  quantity: item.quantity,
+                  unit: item.unit,
+                );
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('${item.name} added to shopping list')),
+                  );
+                }
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(value: 'edit', child: Text('Edit')),
+              const PopupMenuItem(value: 'add_to_shopping', child: Text('Add to Shopping List')),
+              const PopupMenuItem(value: 'delete', child: Text('Delete')),
+            ],
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildAdBanner(BuildContext context) {
-    return Container(
-      width: double.infinity,
+    return GlassContainer(
+      blur: 10,
+      opacity: 0.15,
       padding: const EdgeInsets.all(16),
       margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(8),
-      ),
       child: Row(
         children: [
-          const Icon(Icons.ad_units, size: 32),
+          const Icon(Icons.ad_units, size: 32, color: Colors.white),
           const SizedBox(width: 16),
-          const Expanded(
+          Expanded(
             child: Text(
               'Advertisement Space\nRemove ads with Pro',
-              style: TextStyle(fontSize: 12),
+              style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.9)),
             ),
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/subscription');
-            },
-            child: const Text('Upgrade'),
+          GlassContainer(
+            blur: 10,
+            opacity: 0.2,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: InkWell(
+              onTap: () {
+                Navigator.pushNamed(context, '/subscription');
+              },
+              child: const Text('Upgrade', style: TextStyle(color: Colors.white)),
+            ),
           ),
         ],
       ),
@@ -603,16 +703,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildUpgradeBanner(BuildContext context, UserModel? user) {
-    return Container(
-      width: double.infinity,
+    return GlassContainer(
+      blur: 10,
+      opacity: 0.2,
       padding: const EdgeInsets.all(16),
       margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.amber[400]!, Colors.amber[700]!],
-        ),
-        borderRadius: BorderRadius.circular(12),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -638,15 +733,19 @@ class _HomeScreenState extends State<HomeScreen> {
             style: TextStyle(color: Colors.white),
           ),
           const SizedBox(height: 12),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/subscription');
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.amber[700],
+          GlassContainer(
+            blur: 10,
+            opacity: 0.3,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            child: InkWell(
+              onTap: () {
+                Navigator.pushNamed(context, '/subscription');
+              },
+              child: const Text(
+                'View Plans',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
             ),
-            child: const Text('View Plans'),
           ),
         ],
       ),

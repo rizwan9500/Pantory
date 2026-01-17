@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../services/pantry_service.dart';
 import '../services/auth_service.dart';
 import '../models/shopping_list_item.dart';
+import '../widgets/animated_gradient_background.dart';
+import '../widgets/glass_container.dart';
 
 class ShoppingListScreen extends StatelessWidget {
   const ShoppingListScreen({super.key});
@@ -15,12 +17,20 @@ class ShoppingListScreen extends StatelessWidget {
     final isPro = user?.isPro ?? false;
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Shopping List'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text('Shopping List', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         actions: [
           if (isPro)
             IconButton(
-              icon: const Icon(Icons.auto_awesome),
+              icon: const Icon(Icons.auto_awesome, color: Colors.white),
               tooltip: 'Generate Smart List',
               onPressed: () async {
                 await pantryService.generateSmartShoppingList();
@@ -34,6 +44,7 @@ class ShoppingListScreen extends StatelessWidget {
               },
             ),
           PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, color: Colors.white),
             onSelected: (value) async {
               if (value == 'clear_checked') {
                 await pantryService.clearCheckedItems();
@@ -82,148 +93,197 @@ class ShoppingListScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: pantryService.shoppingList.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.shopping_cart_outlined, size: 100, color: Colors.grey[400]),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Your shopping list is empty',
-                    style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-                  ),
-                  const SizedBox(height: 8),
-                  if (isPro) ...[
-                    const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      onPressed: () async {
-                        await pantryService.generateSmartShoppingList();
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Smart shopping list generated!'),
+      body: Stack(
+        children: [
+          const AnimatedGradientBackground(
+            theme: GradientTheme.blue,
+            child: SizedBox.expand(),
+          ),
+          SafeArea(
+            child: pantryService.shoppingList.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.shopping_cart_outlined, size: 100, color: Colors.white.withOpacity(0.5)),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Your shopping list is empty',
+                          style: TextStyle(fontSize: 18, color: Colors.white.withOpacity(0.8)),
+                        ),
+                        const SizedBox(height: 8),
+                        if (isPro) ...[
+                          const SizedBox(height: 16),
+                          GlassContainer(
+                            blur: 10,
+                            opacity: 0.2,
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                            child: InkWell(
+                              onTap: () async {
+                                await pantryService.generateSmartShoppingList();
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Smart shopping list generated!'),
+                                    ),
+                                  );
+                                }
+                              },
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.auto_awesome, color: Colors.white),
+                                  SizedBox(width: 8),
+                                  Text('Generate Smart List', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                ],
+                              ),
                             ),
-                          );
-                        }
-                      },
-                      icon: const Icon(Icons.auto_awesome),
-                      label: const Text('Generate Smart List'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.amber,
-                      ),
-                    ),
-                  ] else ...[
-                    const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      margin: const EdgeInsets.symmetric(horizontal: 32),
-                      decoration: BoxDecoration(
-                        color: Colors.amber[50],
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.amber),
-                      ),
-                      child: Column(
-                        children: [
-                          const Icon(Icons.auto_awesome, color: Colors.amber, size: 32),
-                          const SizedBox(height: 8),
-                          const Text(
-                            'Smart Shopping List',
-                            style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'Upgrade to Pro for automatic shopping list generation',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 12),
-                          ),
-                          const SizedBox(height: 8),
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/subscription');
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.amber,
+                        ] else ...[
+                          const SizedBox(height: 16),
+                          GlassContainer(
+                            blur: 10,
+                            opacity: 0.15,
+                            padding: const EdgeInsets.all(16),
+                            margin: const EdgeInsets.symmetric(horizontal: 32),
+                            child: Column(
+                              children: [
+                                const Icon(Icons.auto_awesome, color: Colors.white, size: 32),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Smart Shopping List',
+                                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Upgrade to Pro for automatic shopping list generation',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.8)),
+                                ),
+                                const SizedBox(height: 8),
+                                GlassContainer(
+                                  blur: 10,
+                                  opacity: 0.2,
+                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                  child: InkWell(
+                                    onTap: () {
+                                      Navigator.pushNamed(context, '/subscription');
+                                    },
+                                    child: const Text('Upgrade Now', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                  ),
+                                ),
+                              ],
                             ),
-                            child: const Text('Upgrade Now'),
                           ),
                         ],
-                      ),
+                      ],
                     ),
-                  ],
-                ],
-              ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: pantryService.shoppingList.length,
-              itemBuilder: (context, index) {
-                final item = pantryService.shoppingList[index];
-                return _buildShoppingItem(context, item, pantryService);
-              },
-            ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddShoppingItemDialog(context),
-        backgroundColor: Colors.green,
-        child: const Icon(Icons.add),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: pantryService.shoppingList.length,
+                    itemBuilder: (context, index) {
+                      final item = pantryService.shoppingList[index];
+                      return _buildShoppingItem(context, item, pantryService);
+                    },
+                  ),
+          ),
+        ],
+      ),
+      floatingActionButton: GlassContainer(
+        blur: 10,
+        opacity: 0.2,
+        borderRadius: 16,
+        padding: const EdgeInsets.all(16),
+        child: InkWell(
+          onTap: () => _showAddShoppingItemDialog(context),
+          child: const Icon(Icons.add, color: Colors.white, size: 28),
+        ),
       ),
     );
   }
 
   Widget _buildShoppingItem(BuildContext context, ShoppingListItem item, PantryService pantryService) {
-    return Card(
+    return GlassContainer(
+      blur: 10,
+      opacity: 0.15,
       margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        leading: Checkbox(
-          value: item.isChecked,
-          onChanged: (value) async {
-            await pantryService.toggleShoppingItem(item.id);
-          },
-        ),
-        title: Text(
-          item.name,
-          style: TextStyle(
-            decoration: item.isChecked ? TextDecoration.lineThrough : null,
-            color: item.isChecked ? Colors.grey : null,
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        children: [
+          Checkbox(
+            value: item.isChecked,
+            onChanged: (value) async {
+              await pantryService.toggleShoppingItem(item.id);
+            },
+            fillColor: MaterialStateProperty.resolveWith((states) {
+              if (states.contains(MaterialState.selected)) {
+                return Colors.white;
+              }
+              return Colors.white.withOpacity(0.3);
+            }),
+            checkColor: Colors.green,
           ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('${item.quantity} ${item.unit} • ${item.category}'),
-            if (item.notes != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                item.notes!,
-                style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
-              ),
-            ],
-            if (item.autoAdded)
-              Container(
-                margin: const EdgeInsets.only(top: 4),
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Colors.amber[100],
-                  borderRadius: BorderRadius.circular(8),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.name,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    decoration: item.isChecked ? TextDecoration.lineThrough : null,
+                    color: item.isChecked ? Colors.white.withOpacity(0.5) : Colors.white,
+                  ),
                 ),
-                child: const Text(
-                  'Auto-added',
-                  style: TextStyle(fontSize: 10, color: Colors.amber),
+                const SizedBox(height: 4),
+                Text(
+                  '${item.quantity} ${item.unit} • ${item.category}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.white.withOpacity(0.7),
+                  ),
                 ),
-              ),
-          ],
-        ),
-        trailing: IconButton(
-          icon: const Icon(Icons.delete, color: Colors.red),
-          onPressed: () async {
-            await pantryService.removeFromShoppingList(item.id);
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('${item.name} removed')),
-              );
-            }
-          },
-        ),
+                if (item.notes != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    item.notes!,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontStyle: FontStyle.italic,
+                      color: Colors.white.withOpacity(0.6),
+                    ),
+                  ),
+                ],
+                if (item.autoAdded)
+                  Container(
+                    margin: const EdgeInsets.only(top: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Text(
+                      'Auto-added',
+                      style: TextStyle(fontSize: 10, color: Colors.white),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.white70),
+            onPressed: () async {
+              await pantryService.removeFromShoppingList(item.id);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('${item.name} removed')),
+                );
+              }
+            },
+          ),
+        ],
       ),
     );
   }
