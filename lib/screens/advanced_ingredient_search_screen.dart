@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/ingredient_search_service.dart';
+import '../services/supabase_ingredient_service.dart';
 import '../services/image_recognition_service.dart';
 import '../services/barcode_scan_service.dart';
 import '../widgets/animated_gradient_background.dart';
@@ -7,7 +8,8 @@ import '../widgets/glass_container.dart';
 import 'dart:io';
 
 /// Advanced ingredient search screen with multiple input methods
-/// - Text search across multiple databases
+/// - Supabase database (your own ingredient database - PRIMARY)
+/// - Text search across multiple external databases (fallback)
 /// - Image recognition
 /// - Barcode scanning
 class AdvancedIngredientSearchScreen extends StatefulWidget {
@@ -19,6 +21,7 @@ class AdvancedIngredientSearchScreen extends StatefulWidget {
 
 class _AdvancedIngredientSearchScreenState extends State<AdvancedIngredientSearchScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final SupabaseIngredientService _supabaseService = SupabaseIngredientService();
   final IngredientSearchService _searchService = IngredientSearchService();
   final ImageRecognitionService _imageService = ImageRecognitionService();
   final BarcodeScanService _barcodeService = BarcodeScanService();
@@ -27,6 +30,8 @@ class _AdvancedIngredientSearchScreenState extends State<AdvancedIngredientSearc
   bool _isLoading = false;
   String? _errorMessage;
   SearchMode _searchMode = SearchMode.text;
+  bool _useSupabase = true; // Primary: Use Supabase database
+  bool _useExternalAPIs = false; // Fallback: External APIs when needed
   
   @override
   void dispose() {
@@ -44,21 +49,47 @@ class _AdvancedIngredientSearchScreenState extends State<AdvancedIngredientSearc
     });
 
     try {
-      final result = await _searchService.searchIngredients(
-        query,
-        limit: 50,
-        includeUSDA: true,
-        includeOpenFoodFacts: true,
-        includeNutritionix: false, // Enable when API key available
-        includeEdamam: false, // Enable when API key available
-      );
-
-      setState(() {
-        _searchResults = result.items;
-        _isLoading = false;
+      List<IngredientItem> results = [];
+      
+      // Primary: Search Supabase database first
+      if (_useSupabase) {
+        results = await _supabaseService.searchIngredients(query, limit: 50);
+        
+        if (results.isNotEmpty) {
+          setState(() {
+            _searchResults = results;
+            _isLoading = false;
+          });
+          return;
+        }
+      }
+      
+      // Fallback: Search external APIs if no results from Supabase
+      if (_useExternalAPIs && results.isEmpty) {
+        final result = await _searchService.searchIngredients(
+          query,
+          limit: 50,
+          includeUSDA: true,
+          includeOpenFoodFacts: true,
+          includeNutritionix: false, // Enable when API key available
+          includeEdamam: false, // Enable when API key available
+        );
+        
+        results = result.items;
         
         if (result.errors.isNotEmpty) {
-          _errorMessage = 'Some sources unavailable: ${result.errors.join(", ")}';
+          _errorMessage = 'External APIs: ${result.errors.join(", ")}';
+        }
+      }
+
+      setState(() {
+        _searchResults = results;
+        _isLoading = false;
+        
+        if (results.isEmpty) {
+          _errorMessage = _useSupabase 
+              ? 'No results found. Try adding ingredients to your Supabase database or enable external APIs.'
+              : 'No results found in external databases.';
         }
       });
     } catch (e) {
@@ -212,7 +243,9 @@ class _AdvancedIngredientSearchScreenState extends State<AdvancedIngredientSearc
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Search 4M+ ingredients from USDA, Open Food Facts, and more. Find varieties like Fuji apples, King salmon, Baby spinach.',
+                        _useSupabase 
+                            ? 'Searching your Supabase ingredient database. ${_useExternalAPIs ? "External APIs enabled as fallback." : "Enable external APIs for additional sources."}'
+                            : 'Searching 4M+ ingredients from external APIs (USDA, Open Food Facts).',
                         style: TextStyle(
                           color: Colors.white.withOpacity(0.8),
                           fontSize: 13,
@@ -261,6 +294,118 @@ class _AdvancedIngredientSearchScreenState extends State<AdvancedIngredientSearc
               ),
               
               const SizedBox(height: 16),
+              
+              // Data Source Settings
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: GlassContainer(
+                  padding: const EdgeInsets.all(12),
+                  borderRadius: 8,
+                  blur: 10,
+                  opacity: 0.15,
+                  child: Row(
+                    children: [
+                      Icon(Icons.storage, color: Colors.white70, size: 18),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Data Sources',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              _useSupabase ? 'Supabase (Primary)' : 'External APIs only',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      PopupMenuButton<String>(
+                        icon: Icon(Icons.settings, color: Colors.white70, size: 20),
+                        color: Color(0xFF2D1B69),
+                        onSelected: (value) {
+                          setState(() {
+                            if (value == 'supabase') {
+                              _useSupabase = !_useSupabase;
+                            } else if (value == 'external') {
+                              _useExternalAPIs = !_useExternalAPIs;
+                            }
+                          });
+                        },
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            value: 'supabase',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  _useSupabase ? Icons.check_box : Icons.check_box_outline_blank,
+                                  color: Colors.white70,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Supabase Database',
+                                        style: TextStyle(color: Colors.white, fontSize: 13),
+                                      ),
+                                      Text(
+                                        'Your own ingredient DB',
+                                        style: TextStyle(color: Colors.white60, fontSize: 11),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'external',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  _useExternalAPIs ? Icons.check_box : Icons.check_box_outline_blank,
+                                  color: Colors.white70,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'External APIs',
+                                        style: TextStyle(color: Colors.white, fontSize: 13),
+                                      ),
+                                      Text(
+                                        'USDA, Open Food Facts',
+                                        style: TextStyle(color: Colors.white60, fontSize: 11),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 12),
               
               // Search Bar
               Padding(

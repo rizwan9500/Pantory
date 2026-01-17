@@ -1,6 +1,6 @@
 # Pantory - Smart Pantry Management App
 
-A freemium subscription-based mobile application for managing your pantry efficiently with a 7-day free trial, Razorpay payment integration, and AI-powered mood-based recipe suggestions.
+A freemium subscription-based mobile application for managing your pantry efficiently with a 7-day free trial, Razorpay payment integration, AI-powered mood-based recipe suggestions, and comprehensive ingredient search with Supabase integration.
 
 ![Pantory Logo](Pantory.png)
 
@@ -26,6 +26,9 @@ A freemium subscription-based mobile application for managing your pantry effici
 - ✅ **AI-Powered Mood-Based Recipe Assistant** 🆕
 - ✅ **Enhanced Profile with Mood Tracking** 🆕
 - ✅ **Advanced Settings & Personalization** 🆕
+- ✅ **Supabase Ingredient Database Integration** 🆕
+- ✅ **Advanced 20x Ingredient Search** 🆕
+- ✅ **Image Recognition & Barcode Scanning** 🆕
 
 ### Free Features
 - ✅ Basic Pantry Management
@@ -33,6 +36,7 @@ A freemium subscription-based mobile application for managing your pantry effici
 - ✅ Basic Sync Across Devices
 - ✅ AI Assistant (Basic conversational features)
 - ✅ Mood Tracking
+- ✅ Ingredient Search (Supabase database)
 - ⚠️ Ad-supported experience
 
 ### Pro Features (Available with Subscription)
@@ -44,10 +48,58 @@ A freemium subscription-based mobile application for managing your pantry effici
 - ⭐ Exclusive Content
 - ⭐ Unlimited Sync
 - ⭐ Advanced AI Features (Full mood-based recipe suggestions)
+- ⭐ Advanced Ingredient Search (External APIs + Image Recognition)
+
+## 🔍 Advanced Ingredient Search - 20x Better
+
+Pantory features a world-class ingredient search system with multiple data sources and input methods:
+
+### Supabase Integration (Your Own Database)
+- **Full Control**: Store all ingredients in your own Supabase instance
+- **No API Costs**: No external API dependencies or rate limits
+- **Unlimited Scalability**: Add millions of ingredients
+- **Community-Driven**: Users can contribute to the ingredient database
+- **Privacy-First**: All data stored securely in your Supabase project
+- **Instant Setup**: Run the provided SQL migration and start immediately
+
+### Search Capabilities
+- **Variety Recognition**: Search for specific types (Fuji apple, King salmon, Baby spinach)
+- **Scientific Names**: Precise ingredient identification
+- **Category Filtering**: Filter by fruits, vegetables, meats, etc.
+- **Dietary Tags**: Filter by vegan, gluten-free, keto, etc.
+- **Allergen Exclusion**: Automatically exclude allergens based on user preferences
+- **Popular Ingredients**: Quick access to commonly used ingredients
+
+### Multiple Input Methods
+1. **Text Search**: Type any ingredient name or variety
+2. **Barcode Scanning**: Scan product barcodes for instant lookup
+3. **Image Recognition**: Take a photo and AI identifies the ingredients
+
+### Data Sources
+- **Primary**: Supabase database (your own, unlimited)
+- **Fallback**: USDA FoodData Central (600K+ foods)
+- **Fallback**: Open Food Facts (2.8M+ products)
+- **Optional**: Nutritionix, Edamam (800K+ additional items)
+
+### Setup Guide
+See `SUPABASE_SETUP.md` for complete setup instructions including:
+- Database schema and migration SQL
+- Sample ingredient data
+- Configuration steps
+- Bulk import options
+- API integration guide
 
 ## 🤖 AI Assistant - Your Personal Food Friend
 
 Our AI Assistant is like having a caring friend, sibling, or partner who understands your mood and helps you feel better through food! 
+
+### Natural Language Mood Detection
+- **No Manual Selection**: Just type how you're feeling naturally
+- **Smart Analysis**: AI detects mood from your words, sentiment, and context
+- **Examples**: 
+  - "Having a rough day" → Detects bad mood
+  - "Feeling absolutely amazing!" → Detects excellent mood
+  - "Just okay, nothing special" → Detects okay mood
 
 ### Mood-Based Recipe Suggestions
 The AI Assistant talks with you about your mood and suggests recipes to help elevate your feelings:
@@ -57,6 +109,13 @@ The AI Assistant talks with you about your mood and suggests recipes to help ele
 - **Feeling Good?** 🙂 → Discover recipes to take you from good to great!
 - **Feeling Great?** 😊 → Maintain those good vibes with energizing meals
 - **Feeling Excellent?** 😄 → Keep the momentum with amazing food experiences
+
+### Personalized Recipe Filtering
+All recipes are automatically filtered based on your preferences:
+- **Country/Cuisine**: Regional comfort foods from your home country
+- **Dietary Restrictions**: 33 types including vegetarian, vegan, gluten-free, halal, kosher
+- **Allergies**: Automatically excludes your allergens (60+ allergens tracked)
+- **Disliked Foods**: Respects your food preferences (150+ common dislikes)
 
 ### Conversational & Friendly
 The AI Assistant:
@@ -68,14 +127,15 @@ The AI Assistant:
 
 ### How It Works
 1. Open the AI Assistant from the home screen or settings
-2. Start a conversation about how you're feeling
-3. The AI will chat with you and understand your mood
+2. Start a conversation by typing how you're feeling naturally
+3. The AI detects your mood and responds with empathy
 4. Get personalized recipe suggestions designed to elevate your mood
 5. Each recipe includes:
    - Mood-boosting benefits explanation
    - Preparation time and difficulty
    - Step-by-step instructions
    - Friendly encouragement
+   - Filtered for your dietary needs
 
 ## 📊 Enhanced Profile Features
 
