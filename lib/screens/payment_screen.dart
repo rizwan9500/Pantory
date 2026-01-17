@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../services/auth_service.dart';
 import '../models/subscription_plan.dart';
+import '../widgets/animated_gradient_background.dart';
+import '../widgets/glass_container.dart';
 
 class PaymentScreen extends StatefulWidget {
   final SubscriptionPlan plan;
@@ -100,23 +102,65 @@ class _PaymentScreenState extends State<PaymentScreen> {
     final user = authService.currentUser;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Complete Payment'),
-      ),
-      body: SingleChildScrollView(
+      backgroundColor: Colors.transparent,
+      body: Stack(
+        children: [
+          AnimatedGradientBackground(
+            colors: GradientThemes.orangeTheme,
+            child: const SizedBox.expand(),
+          ),
+          SafeArea(
+            child: Column(
+              children: [
+                // Custom App Bar
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      GlassContainer(
+                        padding: const EdgeInsets.all(8),
+                        borderRadius: 12,
+                        blur: 10,
+                        opacity: 0.2,
+                        child: IconButton(
+                          icon: const Icon(Icons.arrow_back, color: Colors.white),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ),
+                      const Expanded(
+                        child: Center(
+                          child: Text(
+                            'Complete Payment',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 56),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
         child: Column(
           children: [
             // Plan Summary Card
-            Container(
+            GlassContainer(
               width: double.infinity,
-              color: Colors.green[50],
               padding: const EdgeInsets.all(24),
+              margin: const EdgeInsets.all(16),
+              borderRadius: 16,
+              blur: 15,
+              opacity: 0.25,
               child: Column(
                 children: [
                   const Icon(
                     Icons.workspace_premium,
                     size: 64,
-                    color: Colors.amber,
+                    color: Colors.white,
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -124,6 +168,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -132,15 +177,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     style: const TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
-                      color: Colors.green,
+                      color: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     widget.plan.duration,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
-                      color: Colors.grey[700],
+                      color: Colors.white70,
                     ),
                   ),
                 ],
