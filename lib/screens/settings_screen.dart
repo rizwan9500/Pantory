@@ -166,12 +166,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: const Text('Help & FAQ'),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Help center coming soon!'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
+              Navigator.pushNamed(context, '/help');
             },
           ),
           
@@ -213,12 +208,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: const Text('Terms of Service'),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Terms of service page coming soon!'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
+              Navigator.pushNamed(context, '/terms');
             },
           ),
           
@@ -227,12 +217,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: const Text('Privacy Policy'),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Privacy policy page coming soon!'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
+              Navigator.pushNamed(context, '/privacy');
             },
           ),
           
