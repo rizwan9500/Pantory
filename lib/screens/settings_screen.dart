@@ -176,6 +176,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildSectionHeader('Personalization'),
           
           _buildGlassTile(
+            icon: Icons.restaurant_menu,
+            title: 'Food Preferences',
+            subtitle: 'Dietary restrictions, allergies, dislikes',
+            onTap: () {
+              Navigator.pushNamed(context, '/user-preferences');
+            },
+          ),
+          
+          _buildGlassTile(
             icon: Icons.language,
             title: 'Language',
             subtitle: _language,

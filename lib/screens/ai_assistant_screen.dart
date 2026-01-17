@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../services/ai_service.dart';
 import '../services/pantry_service.dart';
+import '../models/user_preferences.dart';
 import '../widgets/animated_gradient_background.dart';
 import '../widgets/glass_container.dart';
 
@@ -23,11 +26,13 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
   String? _currentMood;
   String? _currentFoodPreference;
   bool _inMoodConversation = false;
+  UserPreferences? _userPreferences;
 
   @override
   void initState() {
     super.initState();
     _initializeAI();
+    _loadUserPreferences();
     _addWelcomeMessage();
   }
 
@@ -35,10 +40,30 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
     await _aiService.initialize();
   }
 
+  Future<void> _loadUserPreferences() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final prefsJson = prefs.getString('user_preferences');
+      if (prefsJson != null) {
+        setState(() {
+          _userPreferences = UserPreferences.fromJson(jsonDecode(prefsJson));
+        });
+      }
+    } catch (e) {
+      // Preferences not set yet, that's okay
+    }
+  }
+
   void _addWelcomeMessage() {
+    String welcomeText = '👋 Hi! I\'m your AI pantry assistant and friend. I can help with recipes, pantry management, or just chat about how you\'re feeling today! How can I help?';
+    
+    if (_userPreferences != null && _userPreferences!.hasRestrictions()) {
+      welcomeText += '\n\n✨ I see you have dietary preferences set. I\'ll make sure all recipe suggestions respect your needs!';
+    }
+
     setState(() {
       _messages.add(ChatMessage(
-        text: '👋 Hi! I\'m your AI pantry assistant and friend. I can help with recipes, pantry management, or just chat about how you\'re feeling today! How can I help?',
+        text: welcomeText,
         isUser: false,
         timestamp: DateTime.now(),
         suggestions: [
@@ -122,6 +147,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
           _currentMood!,
           text,
           items,
+          userPreferences: _userPreferences,
         );
 
         setState(() {

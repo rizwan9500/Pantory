@@ -367,6 +367,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 width: double.infinity,
                 child: GlassButton(
                   onPressed: () {
+                    Navigator.pushNamed(context, '/user-preferences');
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.restaurant_menu, color: Colors.white),
+                      SizedBox(width: 8),
+                      Text(
+                        'Food Preferences',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              SizedBox(
+                width: double.infinity,
+                child: GlassButton(
+                  onPressed: () {
                     Navigator.pushNamed(context, '/settings');
                   },
                   child: Row(
