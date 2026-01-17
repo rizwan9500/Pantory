@@ -178,7 +178,7 @@ Pantory/
 │   └── data/                        ← Static data (countries, etc.)
 │
 ├── docs/
-│   ├── ARCHITECTURE_DIAGRAMS.md     ← You are here! (visual guides)
+│   ├── ARCHITECTURE_DIAGRAMS.md     ← Visual guides & flows
 │   └── QUICK_START_GUIDE.md         ← This file
 │
 ├── supabase_migration.sql           ← Database setup (RUN THIS!)

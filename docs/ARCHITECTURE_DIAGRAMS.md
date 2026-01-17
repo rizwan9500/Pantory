@@ -52,7 +52,7 @@ lib/screens/
 ├── settings_screen.dart         → App configuration
 ├── ai_assistant_screen.dart     → Mood-based AI chat
 ├── user_preferences_screen.dart → Dietary preferences
-├── advanced_ingredient_search_screen.dart → 4M+ ingredient search
+├── advanced_ingredient_search_screen.dart → Ingredient search (Supabase)
 ├── shopping_list_screen.dart    → Shopping management
 ├── subscription_screen.dart     → Premium features
 └── analytics_screen.dart        → Usage statistics
@@ -118,7 +118,8 @@ This creates all tables and adds sample data:
 ```sql
 ✅ Tables Created:
    ├── ingredients (70+ sample items)
-   │   ├── Fruits: 7 apple varieties, 5 salmon types
+   │   ├── Fruits: 7 apple varieties, banana, orange
+   │   ├── Seafood: 5 salmon varieties, tuna, shrimp
    │   ├── Vegetables: Spinach, tomatoes, onions
    │   ├── Meats: Chicken, beef, pork
    │   ├── Dairy: Milk, cheese, yogurt
