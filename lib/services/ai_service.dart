@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/pantry_item.dart';
@@ -84,7 +85,7 @@ class AIService {
 
       return predictedDate;
     } catch (e) {
-      print('Error predicting expiry date: $e');
+      debugPrint('Error predicting expiry date: $e');
       return null;
     }
   }
@@ -129,7 +130,7 @@ class AIService {
 
       return 'Other';
     } catch (e) {
-      print('Error categorizing item: $e');
+      debugPrint('Error categorizing item: $e');
       return 'Other';
     }
   }
@@ -170,7 +171,7 @@ class AIService {
 
       return recipes;
     } catch (e) {
-      print('Error suggesting recipes: $e');
+      debugPrint('Error suggesting recipes: $e');
       return [];
     }
   }
@@ -206,7 +207,7 @@ class AIService {
         },
       );
     } catch (e) {
-      print('Error generating meal plan: $e');
+      debugPrint('Error generating meal plan: $e');
       return MealPlan(days: days, meals: [], nutritionSummary: {});
     }
   }
@@ -243,7 +244,7 @@ class AIService {
 
       return suggestions;
     } catch (e) {
-      print('Error generating predictive list: $e');
+      debugPrint('Error generating predictive list: $e');
       return [];
     }
   }
@@ -269,7 +270,7 @@ class AIService {
 
       return optimizations;
     } catch (e) {
-      print('Error analyzing prices: $e');
+      debugPrint('Error analyzing prices: $e');
       return [];
     }
   }
@@ -299,7 +300,7 @@ class AIService {
 
       return seasonal[month] ?? [];
     } catch (e) {
-      print('Error getting seasonal recommendations: $e');
+      debugPrint('Error getting seasonal recommendations: $e');
       return [];
     }
   }
@@ -331,7 +332,7 @@ class AIService {
 
       return InventoryForecast(predictions: predictions, alerts: alerts);
     } catch (e) {
-      print('Error forecasting inventory: $e');
+      debugPrint('Error forecasting inventory: $e');
       return InventoryForecast(predictions: [], alerts: []);
     }
   }
@@ -360,11 +361,14 @@ class AIService {
         totalValue += _estimatePrice(item.name);
       }
 
-      final recommendations = <String>[
-        'Buy ${wasteByCategory.entries.first.key} in smaller quantities',
+      final recommendations = <String>[];
+      if (wasteByCategory.isNotEmpty) {
+        recommendations.add('Buy ${wasteByCategory.entries.first.key} in smaller quantities');
+      }
+      recommendations.addAll([
         'Set up expiry notifications',
         'Plan meals ahead to use items before they expire',
-      ];
+      ]);
 
       return WasteInsights(
         totalWaste: expiredItems.length,
@@ -373,7 +377,7 @@ class AIService {
         potentialSavings: totalValue,
       );
     } catch (e) {
-      print('Error analyzing waste: $e');
+      debugPrint('Error analyzing waste: $e');
       return WasteInsights(
         totalWaste: 0,
         wasteByCategory: {},
@@ -411,7 +415,7 @@ class AIService {
         budgetRecommendation: total * 0.9,
       );
     } catch (e) {
-      print('Error analyzing spending: $e');
+      debugPrint('Error analyzing spending: $e');
       return SpendingAnalysis(
         totalSpent: 0,
         categoryBreakdown: {},
@@ -457,7 +461,7 @@ class AIService {
 
       return tips[category] ?? [];
     } catch (e) {
-      print('Error getting storage tips: $e');
+      debugPrint('Error getting storage tips: $e');
       return [];
     }
   }
@@ -497,7 +501,7 @@ class AIService {
         ],
       );
     } catch (e) {
-      print('Error calculating carbon footprint: $e');
+      debugPrint('Error calculating carbon footprint: $e');
       return CarbonFootprint(totalKg: 0, byCategory: {}, suggestions: []);
     }
   }
@@ -546,7 +550,7 @@ class AIService {
 
       return VoiceCommandResult(success: false, message: 'Command not recognized');
     } catch (e) {
-      print('Error processing voice command: $e');
+      debugPrint('Error processing voice command: $e');
       return VoiceCommandResult(success: false, message: 'Error: $e');
     }
   }
@@ -560,7 +564,7 @@ class AIService {
       // For now, return placeholder
       return 'OCR text extraction would happen here';
     } catch (e) {
-      print('Error extracting text: $e');
+      debugPrint('Error extracting text: $e');
       return '';
     }
   }
@@ -581,7 +585,7 @@ class AIService {
         suggestedExpiry: DateTime.now().add(Duration(days: 7)),
       );
     } catch (e) {
-      print('Error recognizing item: $e');
+      debugPrint('Error recognizing item: $e');
       return ItemRecognition(success: false, itemName: '', confidence: 0);
     }
   }
@@ -603,7 +607,7 @@ class AIService {
         nutritionInfo: {'calories': 250, 'protein': 8},
       );
     } catch (e) {
-      print('Error processing barcode: $e');
+      debugPrint('Error processing barcode: $e');
       return BarcodeResult(success: false, message: 'Error: $e');
     }
   }
@@ -684,7 +688,7 @@ class AIService {
         suggestions: ['Find recipes', 'Check expiring items', 'Storage tips'],
       );
     } catch (e) {
-      print('Error in chat: $e');
+      debugPrint('Error in chat: $e');
       return ChatResponse(
         message: 'Sorry, I encountered an error. Please try again.',
         suggestions: [],
@@ -711,7 +715,7 @@ class AIService {
         ),
       ];
     } catch (e) {
-      print('Error getting cooking tips: $e');
+      debugPrint('Error getting cooking tips: $e');
       return [];
     }
   }
@@ -733,7 +737,7 @@ class AIService {
 
       return 'Your pantry looks well-organized with $total items. All items are fresh!';
     } catch (e) {
-      print('Error getting inventory advice: $e');
+      debugPrint('Error getting inventory advice: $e');
       return 'Unable to analyze inventory';
     }
   }
