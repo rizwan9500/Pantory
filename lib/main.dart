@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/home_screen.dart';
@@ -19,6 +21,8 @@ import 'screens/payment_screen.dart';
 import 'services/auth_service.dart';
 import 'services/subscription_service.dart';
 import 'services/pantry_service.dart';
+import 'widgets/animated_gradient_background.dart';
+import 'widgets/glass_container.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -121,44 +125,65 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.green,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // App Logo/Icon
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
+    return AnimatedGradientBackground(
+      colors: GradientThemes.greenTheme,
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Glass container for logo
+              GlassContainer(
+                width: 140,
+                height: 140,
+                borderRadius: 32,
+                blur: 15,
+                opacity: 0.2,
+                child: const Icon(
+                  Icons.inventory_2,
+                  size: 70,
+                  color: Colors.white,
+                ),
               ),
-              child: const Icon(
-                Icons.inventory_2,
-                size: 64,
-                color: Colors.green,
+              const SizedBox(height: 32),
+              const Text(
+                'Pantory',
+                style: TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: 1.2,
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Pantory',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+              const SizedBox(height: 12),
+              const Text(
+                'Smart Pantry Management',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w300,
+                  letterSpacing: 0.5,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Smart Pantry Management',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.white70,
+              const SizedBox(height: 48),
+              // Loading indicator in glass container
+              GlassContainer(
+                padding: const EdgeInsets.all(16),
+                borderRadius: 16,
+                blur: 10,
+                opacity: 0.2,
+                child: const SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
