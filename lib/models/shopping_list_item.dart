@@ -8,6 +8,9 @@ class ShoppingListItem {
   final DateTime addedDate;
   final String? notes;
   final bool autoAdded; // Whether this was auto-added by the smart feature
+  final bool isCompleted; // Whether item has been purchased
+  final String? priority; // Priority: High, Medium, Low
+  final double? estimatedPrice; // Estimated price for AI features
 
   ShoppingListItem({
     required this.id,
@@ -19,6 +22,9 @@ class ShoppingListItem {
     required this.addedDate,
     this.notes,
     this.autoAdded = false,
+    this.isCompleted = false,
+    this.priority,
+    this.estimatedPrice,
   });
 
   // Convert to JSON
@@ -33,6 +39,9 @@ class ShoppingListItem {
       'addedDate': addedDate.toIso8601String(),
       'notes': notes,
       'autoAdded': autoAdded,
+      'isCompleted': isCompleted,
+      'priority': priority,
+      'estimatedPrice': estimatedPrice,
     };
   }
 
@@ -48,6 +57,9 @@ class ShoppingListItem {
       addedDate: DateTime.parse(json['addedDate'] as String),
       notes: json['notes'] as String?,
       autoAdded: json['autoAdded'] as bool? ?? false,
+      isCompleted: json['isCompleted'] as bool? ?? false,
+      priority: json['priority'] as String?,
+      estimatedPrice: json['estimatedPrice'] as double?,
     );
   }
 
@@ -62,6 +74,9 @@ class ShoppingListItem {
     DateTime? addedDate,
     String? notes,
     bool? autoAdded,
+    bool? isCompleted,
+    String? priority,
+    double? estimatedPrice,
   }) {
     return ShoppingListItem(
       id: id ?? this.id,
@@ -73,6 +88,9 @@ class ShoppingListItem {
       addedDate: addedDate ?? this.addedDate,
       notes: notes ?? this.notes,
       autoAdded: autoAdded ?? this.autoAdded,
+      isCompleted: isCompleted ?? this.isCompleted,
+      priority: priority ?? this.priority,
+      estimatedPrice: estimatedPrice ?? this.estimatedPrice,
     );
   }
 }
