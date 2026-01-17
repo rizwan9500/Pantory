@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_model.dart';
 
 class AuthService extends ChangeNotifier {
@@ -9,9 +10,26 @@ class AuthService extends ChangeNotifier {
   UserModel? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
   bool get isAuthenticated => _currentUser != null;
+  
+  // Supabase client
+  final SupabaseClient _supabase = Supabase.instance.client;
 
   AuthService() {
     _loadUserFromStorage();
+    _setupAuthListener();
+  }
+  
+  // Listen to Supabase auth state changes
+  void _setupAuthListener() {
+    _supabase.auth.onAuthStateChange.listen((data) {
+      final session = data.session;
+      if (session != null) {
+        _syncUserFromSupabase(session.user);
+      } else if (_currentUser != null) {
+        // User logged out
+        logout();
+      }
+    });
   }
 
   Future<void> _loadUserFromStorage() async {
@@ -19,6 +37,13 @@ class AuthService extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final userId = prefs.getString('userId');
       final userEmail = prefs.getString('userEmail');
+      
+      // Check if there's an active Supabase session
+      final session = _supabase.auth.currentSession;
+      if (session != null) {
+        await _syncUserFromSupabase(session.user);
+        return;
+      }
       
       if (userId != null && userEmail != null) {
         final isTrialActive = prefs.getBool('isTrialActive') ?? false;
@@ -50,6 +75,44 @@ class AuthService extends ChangeNotifier {
       debugPrint('Error loading user from storage: $e');
     }
   }
+  
+  // Sync user data from Supabase auth to local storage
+  Future<void> _syncUserFromSupabase(User supabaseUser) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      
+      // Check if this is a new user (no local data)
+      final existingUserId = prefs.getString('userId');
+      final isNewUser = existingUserId != supabaseUser.id;
+      
+      // For new users, activate 7-day trial
+      final now = DateTime.now();
+      final trialEndDate = isNewUser ? now.add(const Duration(days: 7)) : null;
+      
+      _currentUser = UserModel(
+        id: supabaseUser.id,
+        email: supabaseUser.email ?? '',
+        name: supabaseUser.userMetadata?['name'] as String? ?? 
+              supabaseUser.userMetadata?['full_name'] as String?,
+        createdAt: isNewUser ? now : DateTime.parse(prefs.getString('createdAt') ?? now.toIso8601String()),
+        isTrialActive: isNewUser ? true : (prefs.getBool('isTrialActive') ?? false),
+        trialEndDate: isNewUser ? trialEndDate : 
+                     (prefs.getString('trialEndDate') != null ? 
+                      DateTime.parse(prefs.getString('trialEndDate')!) : null),
+        subscriptionStatus: isNewUser ? SubscriptionStatus.trial :
+                           SubscriptionStatus.values.firstWhere(
+                             (e) => e.toString() == prefs.getString('subscriptionStatus'),
+                             orElse: () => SubscriptionStatus.free,
+                           ),
+        currentPlan: prefs.getString('currentPlan'),
+      );
+      
+      await _saveUserToStorage(_currentUser!);
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error syncing user from Supabase: $e');
+    }
+  }
 
   Future<void> _saveUserToStorage(UserModel user) async {
     try {
@@ -78,29 +141,23 @@ class AuthService extends ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      // Simulate API call delay
-      await Future.delayed(const Duration(seconds: 1));
-
-      // In a real app, this would call Firebase Auth or your backend
-      // For now, create a mock user with 7-day trial
-      final now = DateTime.now();
-      final trialEndDate = now.add(const Duration(days: 7));
-      
-      _currentUser = UserModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+      // Sign up with Supabase
+      final response = await _supabase.auth.signUp(
         email: email,
-        name: name,
-        createdAt: now,
-        isTrialActive: true,
-        trialEndDate: trialEndDate,
-        subscriptionStatus: SubscriptionStatus.trial,
+        password: password,
+        data: name != null ? {'name': name} : null,
       );
 
-      await _saveUserToStorage(_currentUser!);
+      if (response.user != null) {
+        await _syncUserFromSupabase(response.user!);
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
       
       _isLoading = false;
       notifyListeners();
-      return true;
+      return false;
     } catch (e) {
       _isLoading = false;
       notifyListeners();
@@ -114,23 +171,22 @@ class AuthService extends ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      // Simulate API call delay
-      await Future.delayed(const Duration(seconds: 1));
-
-      // In a real app, this would call Firebase Auth or your backend
-      // For now, create a mock user
-      _currentUser = UserModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+      // Login with Supabase
+      final response = await _supabase.auth.signInWithPassword(
         email: email,
-        createdAt: DateTime.now(),
-        subscriptionStatus: SubscriptionStatus.free,
+        password: password,
       );
 
-      await _saveUserToStorage(_currentUser!);
+      if (response.user != null) {
+        await _syncUserFromSupabase(response.user!);
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
       
       _isLoading = false;
       notifyListeners();
-      return true;
+      return false;
     } catch (e) {
       _isLoading = false;
       notifyListeners();
@@ -144,26 +200,17 @@ class AuthService extends ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      // Simulate API call delay
-      await Future.delayed(const Duration(seconds: 1));
-
-      // In a real app, this would use GoogleSignIn package
-      final now = DateTime.now();
-      _currentUser = UserModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        email: 'user@google.com',
-        name: 'Google User',
-        createdAt: now,
-        isTrialActive: true,
-        trialEndDate: now.add(const Duration(days: 7)),
-        subscriptionStatus: SubscriptionStatus.trial,
+      // Sign in with Google using Supabase
+      final response = await _supabase.auth.signInWithOAuth(
+        Provider.google,
+        redirectTo: 'io.supabase.pantory://login-callback/',
       );
 
-      await _saveUserToStorage(_currentUser!);
-      
+      // OAuth flow will redirect, so we return true here
+      // The actual auth state change will be handled by the listener
       _isLoading = false;
       notifyListeners();
-      return true;
+      return response;
     } catch (e) {
       _isLoading = false;
       notifyListeners();
@@ -177,10 +224,8 @@ class AuthService extends ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      // Simulate API call delay
-      await Future.delayed(const Duration(seconds: 1));
-
-      // In a real app, this would call Firebase Auth or your backend
+      // Send password reset email via Supabase
+      await _supabase.auth.resetPasswordForEmail(email);
       
       _isLoading = false;
       notifyListeners();
@@ -195,8 +240,13 @@ class AuthService extends ChangeNotifier {
 
   Future<void> logout() async {
     try {
+      // Sign out from Supabase
+      await _supabase.auth.signOut();
+      
+      // Clear local storage
       final prefs = await SharedPreferences.getInstance();
       await prefs.clear();
+      
       _currentUser = null;
       notifyListeners();
     } catch (e) {

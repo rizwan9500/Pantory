@@ -191,16 +191,16 @@ Welcome Screen
 
 1. **Clone**: `git clone https://github.com/rizwan9500/Pantory.git`
 2. **Dependencies**: `flutter pub get`
-3. **Run**: `flutter run`
-4. **Test Data**: Use "Add Sample Items" button in empty pantry
-5. **Configure**: Add Firebase config and Razorpay keys for full functionality
+3. **Configure Supabase**: Update URL and anon key in `lib/main.dart`
+4. **Run**: `flutter run`
+5. **Test Data**: Use "Add Sample Items" button in empty pantry
 
 ## 🔐 Security & Privacy
 
 ### Implemented
 - Local data encryption via SharedPreferences
 - No sensitive data stored in plain text
-- User passwords (when Firebase enabled) use secure auth
+- Supabase authentication with secure password hashing
 - Privacy Policy clearly states data usage
 - Terms of Service defines user rights
 
@@ -243,9 +243,9 @@ Welcome Screen
 - Local mode fully functional
 
 ### Needs Configuration for Production ⚙️
-- Firebase credentials
+- Supabase URL and anon key (already configured)
 - Razorpay production API keys
-- Google Sign-In configuration
+- Google OAuth configuration in Supabase
 - App signing certificates
 - Backend API endpoints (for sync)
 - Push notification setup
@@ -263,8 +263,7 @@ Welcome Screen
 ## 📱 Deployment Checklist
 
 ### Android
-- [ ] Configure Firebase for Android
-- [ ] Add google-services.json
+- [ ] Configure Supabase redirect URLs for Android
 - [ ] Update app signing
 - [ ] Set Razorpay production key
 - [ ] Test on physical devices
@@ -272,8 +271,7 @@ Welcome Screen
 - [ ] Submit to Play Store
 
 ### iOS
-- [ ] Configure Firebase for iOS
-- [ ] Add GoogleService-Info.plist
+- [ ] Configure Supabase redirect URLs for iOS
 - [ ] Update provisioning profiles
 - [ ] Set Razorpay production key
 - [ ] Test on physical devices
@@ -313,7 +311,7 @@ The Pantory app is now feature-complete and ready for use! All major functionali
 
 ### Next Steps:
 The app is ready for:
-1. External service configuration (Firebase, Razorpay)
+1. External service configuration (Supabase, Razorpay)
 2. Testing on physical devices
 3. User acceptance testing
 4. Play Store / App Store submission

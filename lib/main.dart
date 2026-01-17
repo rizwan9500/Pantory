@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
@@ -21,8 +22,11 @@ import 'services/pantry_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize Firebase (commented out for now - add when Firebase is configured)
-  // await Firebase.initializeApp();
+  // Initialize Supabase
+  await Supabase.initialize(
+    url: 'https://J_1ZnzV5Kc62hCop5GKcgA.supabase.co',
+    anonKey: 'sb_publishable_J_1ZnzV5Kc62hCop5GKcgA_gX3Vmlqn',
+  );
   
   runApp(const PantoryApp());
 }

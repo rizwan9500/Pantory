@@ -64,7 +64,7 @@ A freemium subscription-based mobile application for managing your pantry effici
 - Dart SDK
 - Android Studio / Xcode (for mobile development)
 - A Razorpay account (for payment integration)
-- Firebase account (for authentication)
+- A Supabase account (for authentication)
 
 ### Installation
 
@@ -79,11 +79,17 @@ cd Pantory
 flutter pub get
 ```
 
-3. Configure Firebase:
-   - Create a new Firebase project
-   - Add Android and iOS apps in Firebase Console
-   - Download and add `google-services.json` (Android) and `GoogleService-Info.plist` (iOS)
-   - Update the configuration files
+3. Configure Supabase:
+   - Create a new Supabase project at https://supabase.com
+   - Get your project URL and anon key
+   - Update the Supabase configuration in `lib/main.dart`:
+     ```dart
+     await Supabase.initialize(
+       url: 'YOUR_SUPABASE_URL',
+       anonKey: 'YOUR_SUPABASE_ANON_KEY',
+     );
+     ```
+   - Enable Email authentication in Supabase Dashboard
 
 4. Configure Razorpay:
    - Sign up for Razorpay account at https://razorpay.com
@@ -177,13 +183,14 @@ The app uses **Razorpay** for payment processing, supporting:
 
 ## Authentication
 
-Currently uses local storage (SharedPreferences) for demo purposes.
+Uses Supabase Authentication for secure user management.
 
-### To enable Firebase Authentication:
-
-1. Uncomment Firebase initialization in `main.dart`
-2. Update `auth_service.dart` to use Firebase Auth methods
-3. Add Firebase configuration files to Android/iOS
+### Authentication Features:
+- Email/Password authentication
+- Google OAuth (configured via Supabase)
+- Password reset functionality
+- Session management
+- Automatic trial activation for new users
 
 ## Features by User Type
 
@@ -223,7 +230,7 @@ Currently uses local storage (SharedPreferences) for demo purposes.
 - [ ] Future: Testing & Backend Integration
   - [ ] End-to-end testing
   - [ ] Payment flow testing
-  - [ ] Firebase authentication integration
+  - [ ] Supabase authentication integration (completed)
   - [ ] Cross-device sync backend
   - [ ] Performance optimization
 
@@ -266,7 +273,8 @@ Create a `.env` file for sensitive configuration:
 ```
 RAZORPAY_KEY_ID=your_key_here
 RAZORPAY_KEY_SECRET=your_secret_here
-FIREBASE_API_KEY=your_firebase_key
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 ## Contributing
@@ -289,7 +297,7 @@ For support, email support@pantory.com or open an issue in the repository.
 
 - Flutter team for the amazing framework
 - Razorpay for seamless payment integration
-- Firebase for authentication services
+- Supabase for authentication and backend services
 
 ---
 
