@@ -11,6 +11,7 @@ import 'screens/profile_screen.dart';
 import 'screens/settings_screen.dart';
 import 'services/auth_service.dart';
 import 'services/subscription_service.dart';
+import 'services/pantry_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +31,7 @@ class PantoryApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthService()),
         ChangeNotifierProvider(create: (_) => SubscriptionService()),
+        ChangeNotifierProvider(create: (_) => PantryService()),
       ],
       child: MaterialApp(
         title: 'Pantory',
