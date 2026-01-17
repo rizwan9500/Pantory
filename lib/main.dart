@@ -9,6 +9,8 @@ import 'screens/trial_info_screen.dart';
 import 'screens/subscription_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/shopping_list_screen.dart';
+import 'screens/analytics_screen.dart';
 import 'services/auth_service.dart';
 import 'services/subscription_service.dart';
 import 'services/pantry_service.dart';
@@ -67,6 +69,8 @@ class PantoryApp extends StatelessWidget {
           '/subscription': (context) => const SubscriptionScreen(),
           '/profile': (context) => const ProfileScreen(),
           '/settings': (context) => const SettingsScreen(),
+          '/shopping-list': (context) => const ShoppingListScreen(),
+          '/analytics': (context) => const AnalyticsScreen(),
         },
       ),
     );

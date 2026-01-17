@@ -173,6 +173,39 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             
+            const SizedBox(height: 16),
+            
+            // Quick Action Buttons
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/shopping-list');
+                    },
+                    icon: const Icon(Icons.shopping_cart),
+                    label: const Text('Shopping List'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/analytics');
+                    },
+                    icon: const Icon(Icons.analytics),
+                    label: const Text('Analytics'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            
             const SizedBox(height: 24),
             
             // Recent Items
