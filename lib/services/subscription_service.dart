@@ -72,6 +72,7 @@ class SubscriptionService extends ChangeNotifier {
         'notes': {
           'plan_id': plan.id,
           'user_email': userEmail,
+          'payment_link': 'razorpay.me/@ruzo', // Payment link for direct payments
         },
         'subscription_id': '', // Add subscription ID if using Razorpay subscriptions
       };

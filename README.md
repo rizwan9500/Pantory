@@ -6,6 +6,24 @@ A freemium subscription-based mobile application for managing your pantry effici
 
 ## Features
 
+### Implemented Features ✅
+- ✅ User authentication (signup, login, password reset)
+- ✅ 7-day free trial system
+- ✅ Subscription management with Razorpay integration
+- ✅ Complete pantry item management (add, edit, delete, view)
+- ✅ Expiry tracking with visual indicators
+- ✅ Search functionality
+- ✅ Favorites system (Pro feature)
+- ✅ Shopping list management
+- ✅ Smart shopping list generation (Pro feature)
+- ✅ Analytics dashboard with insights (Pro feature)
+- ✅ Category-based organization
+- ✅ Ad-supported free tier
+- ✅ Pro feature gating
+- ✅ Help & FAQ
+- ✅ Terms of Service
+- ✅ Privacy Policy
+
 ### Free Features
 - ✅ Basic Pantry Management
 - ✅ Expiry Reminders
@@ -46,7 +64,7 @@ A freemium subscription-based mobile application for managing your pantry effici
 - Dart SDK
 - Android Studio / Xcode (for mobile development)
 - A Razorpay account (for payment integration)
-- Firebase account (for authentication)
+- A Supabase account (for authentication)
 
 ### Installation
 
@@ -61,11 +79,17 @@ cd Pantory
 flutter pub get
 ```
 
-3. Configure Firebase:
-   - Create a new Firebase project
-   - Add Android and iOS apps in Firebase Console
-   - Download and add `google-services.json` (Android) and `GoogleService-Info.plist` (iOS)
-   - Update the configuration files
+3. Configure Supabase:
+   - Create a new Supabase project at https://supabase.com
+   - Get your project URL and anon key
+   - Update the Supabase configuration in `lib/main.dart`:
+     ```dart
+     await Supabase.initialize(
+       url: 'YOUR_SUPABASE_URL',
+       anonKey: 'YOUR_SUPABASE_ANON_KEY',
+     );
+     ```
+   - Enable Email authentication in Supabase Dashboard
 
 4. Configure Razorpay:
    - Sign up for Razorpay account at https://razorpay.com
@@ -91,11 +115,13 @@ flutter run -d chrome
 
 ```
 lib/
-├── main.dart                 # App entry point
-├── models/                   # Data models
-│   ├── user_model.dart       # User data model
-│   └── subscription_plan.dart # Subscription plans
-├── screens/                  # UI screens
+├── main.dart                      # App entry point
+├── models/                        # Data models
+│   ├── user_model.dart            # User data model
+│   ├── subscription_plan.dart     # Subscription plans
+│   ├── pantry_item.dart           # Pantry item model
+│   └── shopping_list_item.dart    # Shopping list item model
+├── screens/                       # UI screens
 │   ├── welcome_screen.dart
 │   ├── login_screen.dart
 │   ├── signup_screen.dart
@@ -104,11 +130,17 @@ lib/
 │   ├── home_screen.dart
 │   ├── subscription_screen.dart
 │   ├── profile_screen.dart
-│   └── settings_screen.dart
-├── services/                 # Business logic
-│   ├── auth_service.dart     # Authentication
-│   └── subscription_service.dart # Payment & subscription
-└── widgets/                  # Reusable widgets
+│   ├── settings_screen.dart
+│   ├── shopping_list_screen.dart  # Shopping list management
+│   ├── analytics_screen.dart      # Analytics dashboard
+│   ├── help_screen.dart           # Help & FAQ
+│   ├── terms_screen.dart          # Terms of Service
+│   └── privacy_screen.dart        # Privacy Policy
+├── services/                      # Business logic
+│   ├── auth_service.dart          # Authentication
+│   ├── subscription_service.dart  # Payment & subscription
+│   └── pantry_service.dart        # Pantry management
+└── widgets/                       # Reusable widgets (if needed)
 ```
 
 ## User Flows
@@ -151,13 +183,14 @@ The app uses **Razorpay** for payment processing, supporting:
 
 ## Authentication
 
-Currently uses local storage (SharedPreferences) for demo purposes.
+Uses Supabase Authentication for secure user management.
 
-### To enable Firebase Authentication:
-
-1. Uncomment Firebase initialization in `main.dart`
-2. Update `auth_service.dart` to use Firebase Auth methods
-3. Add Firebase configuration files to Android/iOS
+### Authentication Features:
+- Email/Password authentication
+- Google OAuth (configured via Supabase)
+- Password reset functionality
+- Session management
+- Automatic trial activation for new users
 
 ## Features by User Type
 
@@ -180,15 +213,25 @@ Currently uses local storage (SharedPreferences) for demo purposes.
   - [x] Subscription flow
   - [x] Payment integration
   - [x] Trial management
-- [ ] Day 2: Advanced Features
-  - [ ] Offline mode implementation
-  - [ ] Analytics dashboard
-  - [ ] Shopping list automation
-  - [ ] Enhanced UI/UX
-- [ ] Day 3: Testing & Polish
+- [x] Day 2: Advanced Features
+  - [x] Offline mode implementation (using local storage)
+  - [x] Analytics dashboard
+  - [x] Shopping list automation
+  - [x] Enhanced UI/UX
+  - [x] Complete pantry management with CRUD operations
+  - [x] Smart expiry tracking
+  - [x] Favorites feature
+- [x] Day 3: Content & Polish
+  - [x] Help & FAQ page
+  - [x] Terms of Service
+  - [x] Privacy Policy
+  - [x] Settings page completion
+  - [x] Profile page enhancements
+- [ ] Future: Testing & Backend Integration
   - [ ] End-to-end testing
   - [ ] Payment flow testing
-  - [ ] Bug fixes
+  - [ ] Supabase authentication integration (completed)
+  - [ ] Cross-device sync backend
   - [ ] Performance optimization
 
 ## Testing
@@ -230,7 +273,8 @@ Create a `.env` file for sensitive configuration:
 ```
 RAZORPAY_KEY_ID=your_key_here
 RAZORPAY_KEY_SECRET=your_secret_here
-FIREBASE_API_KEY=your_firebase_key
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 ## Contributing
@@ -253,7 +297,7 @@ For support, email support@pantory.com or open an issue in the repository.
 
 - Flutter team for the amazing framework
 - Razorpay for seamless payment integration
-- Firebase for authentication services
+- Supabase for authentication and backend services
 
 ---
 

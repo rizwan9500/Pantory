@@ -291,8 +291,8 @@ User Selects Plan
 
 ### API Integrations
 - **Razorpay**: Payment processing
-- **Firebase Auth**: User authentication (ready to integrate)
-- **Google Sign-In**: OAuth authentication
+- **Supabase Auth**: User authentication
+- **Supabase Database**: Backend storage (ready to integrate)
 
 ---
 

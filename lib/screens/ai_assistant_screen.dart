@@ -1,0 +1,488 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/ai_service.dart';
+import '../services/pantry_service.dart';
+import '../widgets/animated_gradient_background.dart';
+import '../widgets/glass_container.dart';
+
+/// AI Assistant Chat Screen
+/// Provides conversational AI interface for pantry management
+class AIAssistantScreen extends StatefulWidget {
+  const AIAssistantScreen({super.key});
+
+  @override
+  State<AIAssistantScreen> createState() => _AIAssistantScreenState();
+}
+
+class _AIAssistantScreenState extends State<AIAssistantScreen> {
+  final AIService _aiService = AIService();
+  final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  final List<ChatMessage> _messages = [];
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeAI();
+    _addWelcomeMessage();
+  }
+
+  Future<void> _initializeAI() async {
+    await _aiService.initialize();
+  }
+
+  void _addWelcomeMessage() {
+    setState(() {
+      _messages.add(ChatMessage(
+        text: '👋 Hi! I\'m your AI pantry assistant. How can I help you today?',
+        isUser: false,
+        timestamp: DateTime.now(),
+        suggestions: [
+          'Show recipes',
+          'Check expiring items',
+          'Storage tips',
+          'Shopping list',
+        ],
+      ));
+    });
+  }
+
+  Future<void> _sendMessage(String text) async {
+    if (text.trim().isEmpty) return;
+
+    // Add user message
+    setState(() {
+      _messages.add(ChatMessage(
+        text: text,
+        isUser: true,
+        timestamp: DateTime.now(),
+      ));
+      _isLoading = true;
+    });
+
+    _messageController.clear();
+    _scrollToBottom();
+
+    // Get AI response
+    try {
+      final pantryService = Provider.of<PantryService>(context, listen: false);
+      final items = pantryService.items;
+
+      final response = await _aiService.chat(text, items);
+
+      setState(() {
+        _messages.add(ChatMessage(
+          text: response.message,
+          isUser: false,
+          timestamp: DateTime.now(),
+          suggestions: response.suggestions,
+          action: response.action,
+        ));
+        _isLoading = false;
+      });
+
+      _scrollToBottom();
+    } catch (e) {
+      setState(() {
+        _messages.add(ChatMessage(
+          text: 'Sorry, I encountered an error. Please try again.',
+          isUser: false,
+          timestamp: DateTime.now(),
+        ));
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _scrollToBottom() {
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: [
+          // Animated gradient background
+          const AnimatedGradientBackground(theme: GradientTheme.green),
+
+          // Content
+          SafeArea(
+            child: Column(
+              children: [
+                // Custom app bar
+                _buildAppBar(),
+
+                // Chat messages
+                Expanded(
+                  child: _buildMessageList(),
+                ),
+
+                // Input field
+                _buildInputField(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAppBar() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: GlassContainer(
+              blur: 10,
+              opacity: 0.2,
+              borderRadius: 12,
+              child: const Padding(
+                padding: EdgeInsets.all(12.0),
+                child: Icon(Icons.arrow_back, color: Colors.white),
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'AI Assistant',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  _aiService.isAIEnabled ? 'Online' : 'Offline',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.8),
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          GlassContainer(
+            blur: 10,
+            opacity: 0.2,
+            borderRadius: 12,
+            child: IconButton(
+              onPressed: () {
+                // Show AI settings
+                _showAISettings();
+              },
+              icon: const Icon(Icons.settings, color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMessageList() {
+    return ListView.builder(
+      controller: _scrollController,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      itemCount: _messages.length + (_isLoading ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index == _messages.length && _isLoading) {
+          return _buildLoadingIndicator();
+        }
+
+        final message = _messages[index];
+        return _buildMessageBubble(message);
+      },
+    );
+  }
+
+  Widget _buildMessageBubble(ChatMessage message) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Column(
+        crossAxisAlignment:
+            message.isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: message.isUser
+                ? MainAxisAlignment.end
+                : MainAxisAlignment.start,
+            children: [
+              if (!message.isUser)
+                Container(
+                  width: 40,
+                  height: 40,
+                  margin: const EdgeInsets.only(right: 12),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: [Colors.green.shade400, Colors.blue.shade400],
+                    ),
+                  ),
+                  child: const Icon(Icons.smart_toy, color: Colors.white),
+                ),
+              Flexible(
+                child: GlassContainer(
+                  blur: 10,
+                  opacity: message.isUser ? 0.3 : 0.2,
+                  borderRadius: 16,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      message.text,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              if (message.isUser)
+                Container(
+                  width: 40,
+                  height: 40,
+                  margin: const EdgeInsets.only(left: 12),
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white24,
+                  ),
+                  child: const Icon(Icons.person, color: Colors.white),
+                ),
+            ],
+          ),
+
+          // Suggestions
+          if (message.suggestions != null && message.suggestions!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: message.suggestions!.map((suggestion) {
+                  return GestureDetector(
+                    onTap: () => _sendMessage(suggestion),
+                    child: GlassContainer(
+                      blur: 10,
+                      opacity: 0.2,
+                      borderRadius: 20,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        child: Text(
+                          suggestion,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingIndicator() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            margin: const EdgeInsets.only(right: 12),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                colors: [Colors.green.shade400, Colors.blue.shade400],
+              ),
+            ),
+            child: const Icon(Icons.smart_toy, color: Colors.white),
+          ),
+          GlassContainer(
+            blur: 10,
+            opacity: 0.2,
+            borderRadius: 16,
+            child: const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Text(
+                    'Thinking...',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInputField() {
+    return GlassContainer(
+      blur: 15,
+      opacity: 0.2,
+      borderRadius: 0,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: Colors.white.withOpacity(0.2)),
+                ),
+                child: TextField(
+                  controller: _messageController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    hintText: 'Ask me anything about your pantry...',
+                    hintStyle: TextStyle(color: Colors.white60),
+                    border: InputBorder.none,
+                  ),
+                  textInputAction: TextInputAction.send,
+                  onSubmitted: _sendMessage,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            GestureDetector(
+              onTap: () => _sendMessage(_messageController.text),
+              child: Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [Colors.green.shade400, Colors.blue.shade400],
+                  ),
+                ),
+                child: const Icon(Icons.send, color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showAISettings() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return GlassContainer(
+          blur: 20,
+          opacity: 0.3,
+          borderRadius: 24,
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'AI Settings',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SwitchListTile(
+                  title: const Text(
+                    'Enable AI Features',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  subtitle: Text(
+                    'Turn on/off AI assistance',
+                    style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                  ),
+                  value: _aiService.isAIEnabled,
+                  onChanged: (value) async {
+                    await _aiService.setAIEnabled(value);
+                    setState(() {});
+                    Navigator.pop(context);
+                  },
+                  activeColor: Colors.green,
+                ),
+                const SizedBox(height: 16),
+                ListTile(
+                  leading: const Icon(Icons.info_outline, color: Colors.white),
+                  title: const Text(
+                    'About AI Assistant',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  subtitle: Text(
+                    'Powered by advanced AI to help manage your pantry',
+                    style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+}
+
+class ChatMessage {
+  final String text;
+  final bool isUser;
+  final DateTime timestamp;
+  final List<String>? suggestions;
+  final String? action;
+
+  ChatMessage({
+    required this.text,
+    required this.isUser,
+    required this.timestamp,
+    this.suggestions,
+    this.action,
+  });
+}

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
+import '../widgets/animated_gradient_background.dart';
+import '../widgets/glass_container.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -69,200 +71,302 @@ class _SignupScreenState extends State<SignupScreen> {
     final authService = Provider.of<AuthService>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sign Up'),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 32),
-                
-                const Text(
-                  'Create Account',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                
-                const SizedBox(height: 8),
-                
-                const Text(
-                  'Get started with 7-day free trial',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey,
-                  ),
-                ),
-                
-                const SizedBox(height: 48),
-                
-                // Name Field (Optional)
-                TextFormField(
-                  controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Name (Optional)',
-                    prefixIcon: Icon(Icons.person),
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // Email Field
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    prefixIcon: Icon(Icons.email),
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    if (!value.contains('@')) {
-                      return 'Please enter a valid email';
-                    }
-                    return null;
-                  },
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // Password Field
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    prefixIcon: const Icon(Icons.lock),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword ? Icons.visibility : Icons.visibility_off,
+      body: Stack(
+        children: [
+          // Animated Gradient Background
+          const AnimatedGradientBackground(theme: GradientTheme.purple),
+          
+          // Content
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 32),
+                    
+                    // Back Button
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back, color: Colors.white),
+                        onPressed: () => Navigator.pop(context),
                       ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
                     ),
-                    border: const OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a password';
-                    }
-                    if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
-                    }
-                    return null;
-                  },
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // Confirm Password Field
-                TextFormField(
-                  controller: _confirmPasswordController,
-                  obscureText: _obscureConfirmPassword,
-                  decoration: InputDecoration(
-                    labelText: 'Confirm Password',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
+                    
+                    const SizedBox(height: 16),
+                    
+                    const Text(
+                      'Create Account',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
-                      onPressed: () {
-                        setState(() {
-                          _obscureConfirmPassword = !_obscureConfirmPassword;
-                        });
-                      },
                     ),
-                    border: const OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please confirm your password';
-                    }
-                    if (value != _passwordController.text) {
-                      return 'Passwords do not match';
-                    }
-                    return null;
-                  },
-                ),
-                
-                const SizedBox(height: 32),
-                
-                // Sign Up Button
-                ElevatedButton(
-                  onPressed: authService.isLoading ? null : _handleSignup,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: authService.isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text(
-                          'Sign Up',
-                          style: TextStyle(fontSize: 18),
+                    
+                    const SizedBox(height: 8),
+                    
+                    const Text(
+                      'Get started with 7-day free trial',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white70,
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 48),
+                    
+                    // Name Field (Optional)
+                    GlassContainer(
+                      blur: 10,
+                      opacity: 0.2,
+                      borderRadius: 16,
+                      child: TextFormField(
+                        controller: _nameController,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: const InputDecoration(
+                          labelText: 'Name (Optional)',
+                          labelStyle: TextStyle(color: Colors.white70),
+                          prefixIcon: Icon(Icons.person, color: Colors.white70),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.all(16),
                         ),
-                ),
-                
-                const SizedBox(height: 24),
-                
-                // Divider
-                const Row(
-                  children: [
-                    Expanded(child: Divider()),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Text('OR'),
+                      ),
                     ),
-                    Expanded(child: Divider()),
+                    
+                    const SizedBox(height: 16),
+                    
+                    // Email Field
+                    GlassContainer(
+                      blur: 10,
+                      opacity: 0.2,
+                      borderRadius: 16,
+                      child: TextFormField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                          labelStyle: TextStyle(color: Colors.white70),
+                          prefixIcon: Icon(Icons.email, color: Colors.white70),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.all(16),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your email';
+                          }
+                          if (!value.contains('@')) {
+                            return 'Please enter a valid email';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 16),
+                    
+                    // Password Field
+                    GlassContainer(
+                      blur: 10,
+                      opacity: 0.2,
+                      borderRadius: 16,
+                      child: TextFormField(
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          labelStyle: const TextStyle(color: Colors.white70),
+                          prefixIcon: const Icon(Icons.lock, color: Colors.white70),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                              color: Colors.white70,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                          ),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.all(16),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter a password';
+                          }
+                          if (value.length < 6) {
+                            return 'Password must be at least 6 characters';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 16),
+                    
+                    // Confirm Password Field
+                    GlassContainer(
+                      blur: 10,
+                      opacity: 0.2,
+                      borderRadius: 16,
+                      child: TextFormField(
+                        controller: _confirmPasswordController,
+                        obscureText: _obscureConfirmPassword,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          labelText: 'Confirm Password',
+                          labelStyle: const TextStyle(color: Colors.white70),
+                          prefixIcon: const Icon(Icons.lock_outline, color: Colors.white70),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
+                              color: Colors.white70,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscureConfirmPassword = !_obscureConfirmPassword;
+                              });
+                            },
+                          ),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.all(16),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please confirm your password';
+                          }
+                          if (value != _passwordController.text) {
+                            return 'Passwords do not match';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 32),
+                    
+                    // Sign Up Button
+                    GlassContainer(
+                      blur: 15,
+                      opacity: 0.25,
+                      borderRadius: 16,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: authService.isLoading ? null : _handleSignup,
+                          borderRadius: BorderRadius.circular(16),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: authService.isLoading
+                                ? const Center(
+                                    child: SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                : const Text(
+                                    'Sign Up',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // Divider
+                    const Row(
+                      children: [
+                        Expanded(child: Divider(color: Colors.white54)),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          child: Text('OR', style: TextStyle(color: Colors.white)),
+                        ),
+                        Expanded(child: Divider(color: Colors.white54)),
+                      ],
+                    ),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // Google Sign Up Button
+                    GlassContainer(
+                      blur: 10,
+                      opacity: 0.15,
+                      borderRadius: 16,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: authService.isLoading ? null : _handleGoogleSignup,
+                          borderRadius: BorderRadius.circular(16),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(Icons.g_mobiledata, size: 32, color: Colors.white),
+                                SizedBox(width: 12),
+                                Text(
+                                  'Continue with Google',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // Login Link
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'Already have an account? ',
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pushReplacementNamed(context, '/login');
+                          },
+                          child: const Text(
+                            'Log In',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
-                
-                const SizedBox(height: 24),
-                
-                // Google Sign Up Button
-                OutlinedButton.icon(
-                  onPressed: authService.isLoading ? null : _handleGoogleSignup,
-                  icon: const Icon(Icons.g_mobiledata, size: 32),
-                  label: const Text('Continue with Google'),
-                ),
-                
-                const SizedBox(height: 24),
-                
-                // Login Link
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('Already have an account? '),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pushReplacementNamed(context, '/login');
-                      },
-                      child: const Text('Log In'),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

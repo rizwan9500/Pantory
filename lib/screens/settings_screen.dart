@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
+import '../widgets/animated_gradient_background.dart';
+import '../widgets/glass_container.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -20,42 +22,83 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final user = authService.currentUser;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
-      body: ListView(
+      backgroundColor: Colors.transparent,
+      body: Stack(
         children: [
+          AnimatedGradientBackground(
+            colors: GradientThemes.tealTheme,
+            child: const SizedBox.expand(),
+          ),
+          SafeArea(
+            child: Column(
+              children: [
+                // Custom App Bar
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      GlassContainer(
+                        padding: const EdgeInsets.all(8),
+                        borderRadius: 12,
+                        blur: 10,
+                        opacity: 0.2,
+                        child: IconButton(
+                          icon: const Icon(Icons.arrow_back, color: Colors.white),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ),
+                      const Expanded(
+                        child: Center(
+                          child: Text(
+                            'Settings',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 56),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.all(16),
+                    children: [
           // App Settings Section
           _buildSectionHeader('App Settings'),
           
-          SwitchListTile(
-            title: const Text('Push Notifications'),
-            subtitle: const Text('Receive notifications about expiring items'),
+          _buildGlassSwitchTile(
+            title: 'Push Notifications',
+            subtitle: 'Receive notifications about expiring items',
             value: _notificationsEnabled,
+            icon: Icons.notifications,
             onChanged: (value) {
               setState(() {
                 _notificationsEnabled = value;
               });
             },
-            secondary: const Icon(Icons.notifications),
           ),
           
-          SwitchListTile(
-            title: const Text('Email Notifications'),
-            subtitle: const Text('Receive email updates'),
+          _buildGlassSwitchTile(
+            title: 'Email Notifications',
+            subtitle: 'Receive email updates',
             value: _emailNotifications,
+            icon: Icons.email,
             onChanged: (value) {
               setState(() {
                 _emailNotifications = value;
               });
             },
-            secondary: const Icon(Icons.email),
           ),
           
-          SwitchListTile(
-            title: const Text('Dark Mode'),
-            subtitle: const Text('Use dark theme'),
+          _buildGlassSwitchTile(
+            title: 'Dark Mode',
+            subtitle: 'Use dark theme',
             value: _darkMode,
+            icon: Icons.dark_mode,
             onChanged: (value) {
               setState(() {
                 _darkMode = value;
@@ -67,37 +110,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               );
             },
-            secondary: const Icon(Icons.dark_mode),
           ),
           
-          const Divider(),
+          const SizedBox(height: 16),
           
           // Subscription Section
           _buildSectionHeader('Subscription'),
           
           if (user != null) ...[
-            ListTile(
-              leading: const Icon(Icons.workspace_premium),
-              title: const Text('Manage Subscription'),
-              subtitle: Text(
-                user.isPro
-                    ? 'Pro Member'
-                    : user.isTrialActive
-                        ? 'Trial Active (${user.trialDaysRemaining} days left)'
-                        : 'Free Plan',
-              ),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            _buildGlassTile(
+              icon: Icons.workspace_premium,
+              title: 'Manage Subscription',
+              subtitle: user.isPro
+                  ? 'Pro Member'
+                  : user.isTrialActive
+                      ? 'Trial Active (${user.trialDaysRemaining} days left)'
+                      : 'Free Plan',
               onTap: () {
                 Navigator.pushNamed(context, '/subscription');
               },
             ),
             
             if (user.isPro)
-              ListTile(
-                leading: const Icon(Icons.receipt),
-                title: const Text('Billing History'),
-                subtitle: const Text('View past invoices'),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              _buildGlassTile(
+                icon: Icons.receipt,
+                title: 'Billing History',
+                subtitle: 'View past invoices',
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -109,25 +147,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             
             if (user.isPro)
-              ListTile(
-                leading: const Icon(Icons.cancel, color: Colors.red),
-                title: const Text('Cancel Subscription'),
-                subtitle: const Text('End your subscription'),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              _buildGlassTile(
+                icon: Icons.cancel,
+                iconColor: Colors.red,
+                title: 'Cancel Subscription',
+                subtitle: 'End your subscription',
                 onTap: () => _showCancelSubscriptionDialog(context),
               ),
           ],
           
-          const Divider(),
+          const SizedBox(height: 16),
           
           // Account Section
           _buildSectionHeader('Account'),
           
-          ListTile(
-            leading: const Icon(Icons.person),
-            title: const Text('Edit Profile'),
-            subtitle: const Text('Update your personal information'),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+          _buildGlassTile(
+            icon: Icons.person,
+            title: 'Edit Profile',
+            subtitle: 'Update your personal information',
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -138,47 +175,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           
-          ListTile(
-            leading: const Icon(Icons.lock),
-            title: const Text('Change Password'),
-            subtitle: const Text('Update your password'),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+          _buildGlassTile(
+            icon: Icons.lock,
+            title: 'Change Password',
+            subtitle: 'Update your password',
             onTap: () {
               Navigator.pushNamed(context, '/forgot-password');
             },
           ),
           
-          ListTile(
-            leading: const Icon(Icons.delete_forever, color: Colors.red),
-            title: const Text('Delete Account'),
-            subtitle: const Text('Permanently delete your account'),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+          _buildGlassTile(
+            icon: Icons.delete_forever,
+            iconColor: Colors.red,
+            title: 'Delete Account',
+            subtitle: 'Permanently delete your account',
             onTap: () => _showDeleteAccountDialog(context),
           ),
           
-          const Divider(),
+          const SizedBox(height: 16),
           
           // Support Section
           _buildSectionHeader('Support'),
           
-          ListTile(
-            leading: const Icon(Icons.help),
-            title: const Text('Help & FAQ'),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+          _buildGlassTile(
+            icon: Icons.help,
+            title: 'Help & FAQ',
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Help center coming soon!'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
+              Navigator.pushNamed(context, '/help');
             },
           ),
           
-          ListTile(
-            leading: const Icon(Icons.contact_support),
-            title: const Text('Contact Support'),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+          _buildGlassTile(
+            icon: Icons.contact_support,
+            title: 'Contact Support',
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -189,10 +218,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           
-          ListTile(
-            leading: const Icon(Icons.star),
-            title: const Text('Rate the App'),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+          _buildGlassTile(
+            icon: Icons.star,
+            title: 'Rate the App',
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -203,54 +231,72 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           
-          const Divider(),
+          const SizedBox(height: 16),
           
           // Legal Section
           _buildSectionHeader('Legal'),
           
-          ListTile(
-            leading: const Icon(Icons.description),
-            title: const Text('Terms of Service'),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+          _buildGlassTile(
+            icon: Icons.description,
+            title: 'Terms of Service',
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Terms of service page coming soon!'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
+              Navigator.pushNamed(context, '/terms');
             },
           ),
           
-          ListTile(
-            leading: const Icon(Icons.privacy_tip),
-            title: const Text('Privacy Policy'),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+          _buildGlassTile(
+            icon: Icons.privacy_tip,
+            title: 'Privacy Policy',
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Privacy policy page coming soon!'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
+              Navigator.pushNamed(context, '/privacy');
             },
           ),
           
-          const Divider(),
+          const SizedBox(height: 16),
           
           // About Section
           _buildSectionHeader('About'),
           
-          const ListTile(
-            leading: Icon(Icons.info),
-            title: Text('Version'),
-            subtitle: Text('1.0.0'),
+          GlassContainer(
+            padding: const EdgeInsets.all(16),
+            margin: const EdgeInsets.only(bottom: 12),
+            borderRadius: 12,
+            blur: 10,
+            opacity: 0.2,
+            child: Row(
+              children: const [
+                Icon(Icons.info, color: Colors.white),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Version',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white70,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        '1.0.0',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
           
-          ListTile(
-            leading: const Icon(Icons.code),
-            title: const Text('Open Source Licenses'),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+          _buildGlassTile(
+            icon: Icons.code,
+            title: 'Open Source Licenses',
             onTap: () {
               showLicensePage(
                 context: context,
@@ -265,13 +311,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // Logout Button
           if (user != null)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: OutlinedButton.icon(
+              padding: const EdgeInsets.symmetric(horizontal: 0),
+              child: GlassButton(
                 onPressed: () => _handleLogout(context, authService),
-                icon: const Icon(Icons.logout),
-                label: const Text('Log Out'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.red,
+                color: Colors.red.withOpacity(0.2),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(Icons.logout, color: Colors.white),
+                    SizedBox(width: 8),
+                    Text(
+                      'Log Out',
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -279,19 +332,127 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 24),
         ],
       ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      padding: const EdgeInsets.fromLTRB(0, 16, 0, 8),
       child: Text(
         title,
         style: const TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.bold,
-          color: Colors.grey,
+          color: Colors.white70,
         ),
+      ),
+    );
+  }
+
+  Widget _buildGlassTile({
+    required IconData icon,
+    required String title,
+    String? subtitle,
+    Color? iconColor,
+    required VoidCallback onTap,
+  }) {
+    return GlassContainer(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      borderRadius: 12,
+      blur: 10,
+      opacity: 0.2,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Row(
+          children: [
+            Icon(icon, color: iconColor ?? Colors.white),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                    ),
+                  ),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white70),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGlassSwitchTile({
+    required String title,
+    required String subtitle,
+    required bool value,
+    required IconData icon,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return GlassContainer(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      borderRadius: 12,
+      blur: 10,
+      opacity: 0.2,
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.white),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.white70,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeColor: Colors.white,
+          ),
+        ],
       ),
     );
   }
