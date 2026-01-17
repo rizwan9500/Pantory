@@ -6,6 +6,24 @@ A freemium subscription-based mobile application for managing your pantry effici
 
 ## Features
 
+### Implemented Features ✅
+- ✅ User authentication (signup, login, password reset)
+- ✅ 7-day free trial system
+- ✅ Subscription management with Razorpay integration
+- ✅ Complete pantry item management (add, edit, delete, view)
+- ✅ Expiry tracking with visual indicators
+- ✅ Search functionality
+- ✅ Favorites system (Pro feature)
+- ✅ Shopping list management
+- ✅ Smart shopping list generation (Pro feature)
+- ✅ Analytics dashboard with insights (Pro feature)
+- ✅ Category-based organization
+- ✅ Ad-supported free tier
+- ✅ Pro feature gating
+- ✅ Help & FAQ
+- ✅ Terms of Service
+- ✅ Privacy Policy
+
 ### Free Features
 - ✅ Basic Pantry Management
 - ✅ Expiry Reminders
@@ -91,11 +109,13 @@ flutter run -d chrome
 
 ```
 lib/
-├── main.dart                 # App entry point
-├── models/                   # Data models
-│   ├── user_model.dart       # User data model
-│   └── subscription_plan.dart # Subscription plans
-├── screens/                  # UI screens
+├── main.dart                      # App entry point
+├── models/                        # Data models
+│   ├── user_model.dart            # User data model
+│   ├── subscription_plan.dart     # Subscription plans
+│   ├── pantry_item.dart           # Pantry item model
+│   └── shopping_list_item.dart    # Shopping list item model
+├── screens/                       # UI screens
 │   ├── welcome_screen.dart
 │   ├── login_screen.dart
 │   ├── signup_screen.dart
@@ -104,11 +124,17 @@ lib/
 │   ├── home_screen.dart
 │   ├── subscription_screen.dart
 │   ├── profile_screen.dart
-│   └── settings_screen.dart
-├── services/                 # Business logic
-│   ├── auth_service.dart     # Authentication
-│   └── subscription_service.dart # Payment & subscription
-└── widgets/                  # Reusable widgets
+│   ├── settings_screen.dart
+│   ├── shopping_list_screen.dart  # Shopping list management
+│   ├── analytics_screen.dart      # Analytics dashboard
+│   ├── help_screen.dart           # Help & FAQ
+│   ├── terms_screen.dart          # Terms of Service
+│   └── privacy_screen.dart        # Privacy Policy
+├── services/                      # Business logic
+│   ├── auth_service.dart          # Authentication
+│   ├── subscription_service.dart  # Payment & subscription
+│   └── pantry_service.dart        # Pantry management
+└── widgets/                       # Reusable widgets (if needed)
 ```
 
 ## User Flows
@@ -180,15 +206,25 @@ Currently uses local storage (SharedPreferences) for demo purposes.
   - [x] Subscription flow
   - [x] Payment integration
   - [x] Trial management
-- [ ] Day 2: Advanced Features
-  - [ ] Offline mode implementation
-  - [ ] Analytics dashboard
-  - [ ] Shopping list automation
-  - [ ] Enhanced UI/UX
-- [ ] Day 3: Testing & Polish
+- [x] Day 2: Advanced Features
+  - [x] Offline mode implementation (using local storage)
+  - [x] Analytics dashboard
+  - [x] Shopping list automation
+  - [x] Enhanced UI/UX
+  - [x] Complete pantry management with CRUD operations
+  - [x] Smart expiry tracking
+  - [x] Favorites feature
+- [x] Day 3: Content & Polish
+  - [x] Help & FAQ page
+  - [x] Terms of Service
+  - [x] Privacy Policy
+  - [x] Settings page completion
+  - [x] Profile page enhancements
+- [ ] Future: Testing & Backend Integration
   - [ ] End-to-end testing
   - [ ] Payment flow testing
-  - [ ] Bug fixes
+  - [ ] Firebase authentication integration
+  - [ ] Cross-device sync backend
   - [ ] Performance optimization
 
 ## Testing
