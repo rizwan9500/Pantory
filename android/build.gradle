@@ -8,6 +8,25 @@ allprojects {
 rootProject.buildDir = '../build'
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
+    
+    // Apply common build optimizations
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            project.android {
+                // Enable build cache
+                buildCache {
+                    local {
+                        enabled = true
+                    }
+                }
+                
+                // Optimize build performance
+                compileOptions {
+                    incremental = true
+                }
+            }
+        }
+    }
 }
 subprojects {
     project.evaluationDependsOn(':app')
