@@ -216,15 +216,34 @@ flutter run
 
 ### Before Release:
 
-- [ ] Generate and add certificate pins for all domains
-- [ ] Remove debug-overrides from network_security_config.xml
-- [ ] Store expected signature hash for tamper detection
+- [ ] **CRITICAL**: Store expected signature hash in SecurityManager for tamper detection
+- [ ] **CRITICAL**: Generate and add certificate pins for all domains in network_security_config.xml
+- [ ] **CRITICAL**: Remove or use build-specific variants for debug-overrides in network_security_config.xml
 - [ ] Test on rooted device to verify detection works
 - [ ] Test with Frida/Xposed to verify hook detection
 - [ ] Test certificate pinning with proxy
 - [ ] Implement backend logging for security events
 - [ ] Add rate limiting for security check failures
 - [ ] Configure proper error handling for security violations
+
+### Critical TODOs in Code:
+
+1. **Signature Verification (SecurityManager.kt, line ~188)**:
+   ```kotlin
+   // TODO: Store expected signature hash
+   private const val EXPECTED_SIGNATURE_HASH = "YOUR_PRODUCTION_SIGNATURE_SHA256_HERE"
+   
+   // In isAppTampered():
+   if (hexString != EXPECTED_SIGNATURE_HASH) return true
+   ```
+
+2. **Certificate Pins (network_security_config.xml)**:
+   - Replace placeholder pins with actual values
+   - Get pins using: `openssl s_client -servername domain.com -connect domain.com:443 | openssl x509 -pubkey -noout | openssl rsa -pubin -outform der | openssl dgst -sha256 -binary | openssl enc -base64`
+
+3. **Debug Overrides (network_security_config.xml)**:
+   - Create release-specific config without debug-overrides
+   - Or use Gradle to exclude debug-overrides in release builds
 
 ### Security Response Strategy:
 

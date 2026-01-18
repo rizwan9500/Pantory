@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
 
@@ -19,7 +20,7 @@ class SecurityService {
         final bool result = await platform.invokeMethod('performSecurityCheck');
         return result;
       } on PlatformException catch (e) {
-        print('Failed to perform security check: ${e.message}');
+        debugPrint('Failed to perform security check: ${e.message}');
         return false;
       }
     } else if (Platform.isIOS) {
@@ -39,7 +40,7 @@ class SecurityService {
             await platform.invokeMethod('getSecurityReport');
         return Map<String, dynamic>.from(result);
       } on PlatformException catch (e) {
-        print('Failed to get security report: ${e.message}');
+        debugPrint('Failed to get security report: ${e.message}');
         return {};
       }
     } else if (Platform.isIOS) {
