@@ -83,12 +83,6 @@ android {
             useLegacyPackaging = false
         }
     }
-    
-    // Enable view binding for better performance
-    buildFeatures {
-        viewBinding = false  // Flutter doesn't use Android view binding
-        buildConfig = true
-    }
 }
 
 flutter {

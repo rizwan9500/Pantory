@@ -3,7 +3,9 @@
 
 # Keep all classes - maximize functionality
 -dontobfuscate
--optimizations !code/simplification/arithmetic,!code/simplification/cast,!field/*,!class/merging/*
+
+# Consolidated optimization exclusions for better performance
+-optimizations !code/simplification/arithmetic,!code/simplification/cast,!field/*,!class/merging/*,!code/allocation/variable
 
 # Keep all native methods for full platform support
 -keepclasseswithmembernames class * {
@@ -57,10 +59,6 @@
 -optimizationpasses 3
 -allowaccessmodification
 -repackageclasses ''
-
-# Enable aggressive optimizations for performance
--optimizations !code/simplification/arithmetic
--optimizations !code/allocation/variable
 
 # Keep Kotlin metadata for reflection
 -keep class kotlin.Metadata { *; }

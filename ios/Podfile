@@ -58,7 +58,11 @@ post_install do |installer|
       
       # Enable aggressive performance optimizations
       config.build_settings['SWIFT_COMPILATION_MODE'] = 'wholemodule'
-      config.build_settings['ENABLE_TESTABILITY'] = 'NO' if config.name == 'Release'
+      
+      # Disable testability in release builds for better performance
+      if config.name.downcase.include?('release')
+        config.build_settings['ENABLE_TESTABILITY'] = 'NO'
+      end
       
       # Disable size optimizations, keep all code for maximum functionality
       config.build_settings['DEAD_CODE_STRIPPING'] = 'NO'
