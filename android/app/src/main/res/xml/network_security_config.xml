@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- 
+        Certificate Pinning Configuration for Pantory
+        
+        This configuration provides additional security by ensuring the app only
+        trusts specific certificates for your domains, preventing MITM attacks.
+        
+        IMPORTANT: Update the pin-set with your actual certificate pins before production!
+        To generate SHA-256 pins for your certificates:
+        openssl s_client -servername yourdomain.com -connect yourdomain.com:443 | openssl x509 -pubkey -noout | openssl rsa -pubin -outform der | openssl dgst -sha256 -binary | openssl enc -base64
+    -->
+    
+    <!-- Default configuration for all domains -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <!-- Trust system certificate store -->
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+    
+    <!-- 
+        Supabase Domain Configuration
+        Add your Supabase project URL certificate pins here
+    -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">supabase.co</domain>
+        <!-- 
+        Uncomment and add your certificate pins:
+        <pin-set expiration="2027-01-01">
+            <pin digest="SHA-256">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</pin>
+            <pin digest="SHA-256">BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=</pin>
+        </pin-set>
+        -->
+    </domain-config>
+    
+    <!-- 
+        Razorpay Domain Configuration
+        Add Razorpay certificate pins here
+    -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">razorpay.com</domain>
+        <!-- 
+        Uncomment and add your certificate pins:
+        <pin-set expiration="2027-01-01">
+            <pin digest="SHA-256">CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC=</pin>
+            <pin digest="SHA-256">DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD=</pin>
+        </pin-set>
+        -->
+    </domain-config>
+    
+    <!-- 
+        Custom API Domain Configuration (if you have your own backend)
+        Add your API domain certificate pins here
+    -->
+    <!--
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">yourdomain.com</domain>
+        <pin-set expiration="2027-01-01">
+            <pin digest="SHA-256">YOUR_CERTIFICATE_PIN_HERE=</pin>
+            <pin digest="SHA-256">BACKUP_CERTIFICATE_PIN_HERE=</pin>
+        </pin-set>
+    </domain-config>
+    -->
+    
+    <!-- Debug configuration (remove in production) -->
+    <debug-overrides>
+        <trust-anchors>
+            <!-- Trust user-added certificates for debugging -->
+            <certificates src="user" />
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>

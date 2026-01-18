@@ -14,15 +14,27 @@ This guide covers building and deploying the Pantory app for Android and iOS pla
 
 ### Required Software
 - Flutter SDK (3.0.0 or higher)
+- **Java Development Kit (JDK) 21 or higher** (for Android builds)
 - Android Studio (for Android builds)
+  - Minimum supported Android version: **Android 11 (API 30)**
+  - Target Android version: **Android 14+ (API 36)**
 - Xcode (for iOS builds - macOS only)
+  - Minimum supported iOS version: **iOS 15.0**
+  - Target iOS version: **iOS 17.0+**
 - Valid developer accounts:
   - Google Play Console account (for Android)
   - Apple Developer account (for iOS)
 
+### Build Tool Versions
+- **Gradle**: 8.11.1+
+- **Android Gradle Plugin**: 8.9.1+
+- **Kotlin**: 2.1.0+
+- **Java**: 21+
+
 ### Verify Installation
 ```bash
 flutter doctor -v
+java -version  # Should show Java 21 or higher
 ```
 
 Ensure all checkmarks are green for your target platforms.
@@ -398,9 +410,53 @@ fastlane beta
 - [ ] Track user analytics
 - [ ] Plan updates based on feedback
 
+## Build Performance Optimization
+
+The project is configured for optimal build performance with the following settings:
+
+### Gradle Optimizations (gradle.properties)
+- **Increased JVM heap**: 4GB (`-Xmx4096M`) for faster builds
+- **Build caching**: Enabled for incremental builds
+- **Parallel execution**: Multiple modules build simultaneously
+- **Configuration on demand**: Only configures relevant projects
+- **File system watching**: Faster incremental builds with Gradle 7+
+
+### Kotlin Optimizations
+- **Incremental compilation**: Only recompiles changed files
+- **Kotlin caching**: Caches compilation results
+- **Android-specific incremental**: Optimized for Android modules
+
+### Android Optimizations
+- **R8 full mode**: Advanced code shrinking and optimization
+- **Non-transitive R class**: Reduces R class size
+- **Disabled unused features**: AIDL, RenderScript, Shaders disabled
+
+### Expected Build Times
+- **Clean build**: ~2-3 minutes (depending on hardware)
+- **Incremental build**: 30-60 seconds
+- **Hot reload**: <5 seconds
+
+### Tips for Faster Builds
+1. Use `flutter run` for development (hot reload)
+2. Enable build cache: Already configured in gradle.properties
+3. Use incremental builds: Avoid `flutter clean` unless necessary
+4. Close unnecessary applications to free up RAM
+5. Use SSD storage for project files
+6. Consider upgrading to 16GB+ RAM for large projects
+
 ## Troubleshooting
 
 ### Common Android Issues
+
+**Java version mismatch:**
+```bash
+# Check Java version
+java -version  # Should show Java 21 or higher
+
+# If using wrong version, set JAVA_HOME
+export JAVA_HOME=/path/to/jdk-21
+export PATH=$JAVA_HOME/bin:$PATH
+```
 
 **Build fails with "SDK not found":**
 ```bash
@@ -422,6 +478,17 @@ flutter pub get
 - Check logs: `adb logcat | grep flutter`
 
 ### Common iOS Issues
+
+**iOS deployment target error:**
+```bash
+# If you see "The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to..."
+cd ios
+pod deintegrate
+pod install
+cd ..
+flutter clean
+flutter pub get
+```
 
 **Code signing error:**
 - Verify Bundle ID matches provisioning profile

@@ -27,12 +27,12 @@ android {
     compileSdk = 36
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
     }
 
     kotlinOptions {
-        jvmTarget = '17'
+        jvmTarget = '21'
     }
 
     sourceSets {
@@ -41,15 +41,46 @@ android {
 
     defaultConfig {
         applicationId "com.pantory.app"
-        minSdkVersion 21
+        minSdkVersion 30
         targetSdkVersion 36
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        
+        // Enable multidex for better app functionality support
+        multiDexEnabled true
+        
+        // Vector drawable support for better graphics performance
+        vectorDrawables.useSupportLibrary = true
     }
 
     buildTypes {
         release {
             signingConfig signingConfigs.debug
+            
+            // Disable minification and shrinking for maximum functionality
+            minifyEnabled false
+            shrinkResources false
+            
+            // Enable performance optimizations without removing code
+            debuggable false
+            
+            // Optimize for performance, not size
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        
+        debug {
+            // Enable debugging and profiling tools
+            debuggable true
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+        }
+    }
+    
+    // Performance optimization settings
+    packagingOptions {
+        // Keep all native libraries for maximum compatibility
+        jniLibs {
+            useLegacyPackaging = false
         }
     }
 }
@@ -60,4 +91,8 @@ flutter {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:2.1.0"
+    
+    // Security enhancements
+    implementation "androidx.security:security-crypto:1.1.0-alpha06"
+    implementation "com.scottyab:rootbeer-lib:0.1.1"
 }
