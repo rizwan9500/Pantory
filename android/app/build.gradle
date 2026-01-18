@@ -91,4 +91,8 @@ flutter {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:2.1.0"
+    
+    // Security enhancements
+    implementation "androidx.security:security-crypto:1.1.0-alpha06"
+    implementation "com.scottyab:rootbeer-lib:0.1.0"
 }

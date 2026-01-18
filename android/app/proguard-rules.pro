@@ -7,6 +7,13 @@
 # Consolidated optimization exclusions for better performance
 -optimizations !code/simplification/arithmetic,!code/simplification/cast,!field/*,!class/merging/*,!code/allocation/variable
 
+# Security: Obfuscate security-related classes (exception to dontobfuscate)
+# Note: This provides minimal protection but doesn't compromise functionality
+-keep class com.pantory.app.MainActivity { *; }
+-keep class com.pantory.app.SecurityManager {
+    public <methods>;
+}
+
 # Keep all native methods for full platform support
 -keepclasseswithmembernames class * {
     native <methods>;
