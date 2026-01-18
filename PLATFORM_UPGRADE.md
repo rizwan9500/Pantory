@@ -146,7 +146,7 @@ subprojects {
 
 ### 5. Build Tool Versions
 
-Current versions (verified latest stable as of January 2024):
+Current versions (verified as latest stable):
 
 | Tool | Version | Purpose |
 |------|---------|---------|
@@ -388,6 +388,6 @@ For issues related to this upgrade, please open a GitHub issue with:
 
 ---
 
-**Last Updated**: January 2024  
+**Last Updated**: January 2026  
 **Author**: Platform Engineering Team  
 **Version**: 1.0.0
