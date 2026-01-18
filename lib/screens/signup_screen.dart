@@ -74,7 +74,10 @@ class _SignupScreenState extends State<SignupScreen> {
       body: Stack(
         children: [
           // Animated Gradient Background
-          const AnimatedGradientBackground(theme: GradientTheme.purple),
+          const AnimatedGradientBackground(
+            theme: GradientTheme.purple,
+            child: SizedBox.expand(),
+          ),
           
           // Content
           SafeArea(

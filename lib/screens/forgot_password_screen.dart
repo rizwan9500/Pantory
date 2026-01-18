@@ -48,7 +48,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          const AnimatedGradientBackground(theme: GradientTheme.purple),
+          const AnimatedGradientBackground(
+            theme: GradientTheme.purple,
+            child: SizedBox.expand(),
+          ),
           SafeArea(
             child: Column(
               children: [

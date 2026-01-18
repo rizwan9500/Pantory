@@ -200,7 +200,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 
   Widget _buildPage(OnboardingPage page) {

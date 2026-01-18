@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/ingredient_search_service.dart';
+import '../services/ingredient_search_service.dart' as external;
 import '../services/supabase_ingredient_service.dart';
 import '../services/image_recognition_service.dart';
 import '../services/barcode_scan_service.dart';
@@ -22,7 +22,7 @@ class AdvancedIngredientSearchScreen extends StatefulWidget {
 class _AdvancedIngredientSearchScreenState extends State<AdvancedIngredientSearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   final SupabaseIngredientService _supabaseService = SupabaseIngredientService();
-  final IngredientSearchService _searchService = IngredientSearchService();
+  final external.IngredientSearchService _searchService = external.IngredientSearchService();
   final ImageRecognitionService _imageService = ImageRecognitionService();
   final BarcodeScanService _barcodeService = BarcodeScanService();
   

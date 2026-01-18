@@ -72,7 +72,10 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Stack(
         children: [
           // Animated Gradient Background
-          const AnimatedGradientBackground(theme: GradientTheme.blue),
+          const AnimatedGradientBackground(
+            theme: GradientTheme.blue,
+            child: SizedBox.expand(),
+          ),
           
           // Content
           SafeArea(

@@ -89,7 +89,7 @@ class PantoryApp extends StatelessWidget {
           '/help': (context) => const HelpScreen(),
           '/terms': (context) => const TermsScreen(),
           '/privacy': (context) => const PrivacyScreen(),
-          '/ai-assistant': (context) => const AIAssistantScreen(),
+          '/ai-assistant': (context) => AIAssistantScreen(),
           '/user-preferences': (context) => const UserPreferencesScreen(),
           '/advanced-search': (context) => const AdvancedIngredientSearchScreen(),
         },

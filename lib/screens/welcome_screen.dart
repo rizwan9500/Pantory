@@ -11,7 +11,10 @@ class WelcomeScreen extends StatelessWidget {
       body: Stack(
         children: [
           // Animated Gradient Background
-          const AnimatedGradientBackground(theme: GradientTheme.green),
+          const AnimatedGradientBackground(
+            theme: GradientTheme.green,
+            child: SizedBox.expand(),
+          ),
           
           // Content
           SafeArea(

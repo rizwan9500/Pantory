@@ -15,7 +15,10 @@ class TrialInfoScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          const AnimatedGradientBackground(theme: GradientTheme.orange),
+          const AnimatedGradientBackground(
+            theme: GradientTheme.orange,
+            child: SizedBox.expand(),
+          ),
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),

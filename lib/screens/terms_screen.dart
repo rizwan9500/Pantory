@@ -10,7 +10,10 @@ class TermsScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          const AnimatedGradientBackground(theme: GradientTheme.blue),
+          const AnimatedGradientBackground(
+            theme: GradientTheme.blue,
+            child: SizedBox.expand(),
+          ),
           SafeArea(
             child: Column(
               children: [

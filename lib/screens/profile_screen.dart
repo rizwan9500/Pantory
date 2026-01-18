@@ -128,47 +128,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   Expanded(
                     child: Center(
-                    child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.person_outline, size: 100, color: Colors.white),
-                const SizedBox(height: 24),
-                const Text(
-                  'Please log in to view your profile',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 32),
-                GlassButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/login');
-                  },
-                  child: const Text(
-                    'Log In',
-                    style: TextStyle(color: Colors.white, fontSize: 16),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/signup');
-                  },
-                  child: const Text(
-                    'Sign Up',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.person_outline, size: 100, color: Colors.white),
+                            const SizedBox(height: 24),
+                            const Text(
+                              'Please log in to view your profile',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 32),
+                            GlassButton(
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/login');
+                              },
+                              child: const Text(
+                                'Log In',
+                                style: TextStyle(color: Colors.white, fontSize: 16),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/signup');
+                              },
+                              child: const Text(
+                                'Sign Up',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -233,11 +232,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 Expanded(
                   child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
               const SizedBox(height: 24),
               
               // Profile Picture
@@ -427,9 +426,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               
               const SizedBox(height: 24),
-            ],
-          ),
-        ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),

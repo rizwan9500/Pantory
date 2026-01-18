@@ -10,7 +10,10 @@ class HelpScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          const AnimatedGradientBackground(theme: GradientTheme.teal),
+          const AnimatedGradientBackground(
+            theme: GradientTheme.teal,
+            child: SizedBox.expand(),
+          ),
           SafeArea(
             child: Column(
               children: [

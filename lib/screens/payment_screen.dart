@@ -145,8 +145,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 ),
                 Expanded(
                   child: SingleChildScrollView(
-        child: Column(
-          children: [
+                    child: Column(
+                      children: [
             // Plan Summary Card
             GlassContainer(
               width: double.infinity,
@@ -182,7 +182,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    widget.plan.duration,
+                    widget.plan.durationText,
                     style: const TextStyle(
                       fontSize: 16,
                       color: Colors.white70,
@@ -655,8 +655,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 ],
               ),
             ),
-          ],
-        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

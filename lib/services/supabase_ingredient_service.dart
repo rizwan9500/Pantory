@@ -200,7 +200,7 @@ class SupabaseIngredientService {
       
       // Add category filter
       if (categories != null && categories.isNotEmpty) {
-        queryBuilder = queryBuilder.in_('category', categories);
+        queryBuilder = queryBuilder.inFilter('category', categories);
       }
       
       // Add dietary tags filter

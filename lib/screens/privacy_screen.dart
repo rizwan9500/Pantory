@@ -10,7 +10,10 @@ class PrivacyScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          const AnimatedGradientBackground(theme: GradientTheme.green),
+          const AnimatedGradientBackground(
+            theme: GradientTheme.green,
+            child: SizedBox.expand(),
+          ),
           SafeArea(
             child: Column(
               children: [

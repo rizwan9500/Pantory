@@ -202,7 +202,7 @@ class AuthService extends ChangeNotifier {
 
       // Sign in with Google using Supabase
       final response = await _supabase.auth.signInWithOAuth(
-        Provider.google,
+        OAuthProvider.google,
         redirectTo: 'io.supabase.pantory://login-callback/',
       );
 
