@@ -51,6 +51,20 @@ post_install do |installer|
       
       # Set proper architectures
       config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'i386'
+      
+      # Performance optimizations - focus on speed, not size
+      config.build_settings['SWIFT_OPTIMIZATION_LEVEL'] = '-O'  # Full optimization for speed
+      config.build_settings['GCC_OPTIMIZATION_LEVEL'] = '3'  # Maximum optimization
+      
+      # Enable aggressive performance optimizations
+      config.build_settings['SWIFT_COMPILATION_MODE'] = 'wholemodule'
+      config.build_settings['ENABLE_TESTABILITY'] = 'NO' if config.name == 'Release'
+      
+      # Disable size optimizations, keep all code for maximum functionality
+      config.build_settings['DEAD_CODE_STRIPPING'] = 'NO'
+      config.build_settings['STRIP_INSTALLED_PRODUCT'] = 'NO'
+      config.build_settings['COPY_PHASE_STRIP'] = 'NO'
+      config.build_settings['STRIP_STYLE'] = 'non-global'
     end
   end
 end
